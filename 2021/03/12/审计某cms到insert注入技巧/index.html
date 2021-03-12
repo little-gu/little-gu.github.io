@@ -37,8 +37,10 @@
 <meta property="og:image" content="https://little-gu.github.io/2021/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/4.png">
 <meta property="og:image" content="https://little-gu.github.io/2021/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/5.png">
 <meta property="og:image" content="https://little-gu.github.io/2021/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/6.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/7.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/8.png">
 <meta property="article:published_time" content="2021-03-12T11:28:02.000Z">
-<meta property="article:modified_time" content="2021-03-12T13:21:40.981Z">
+<meta property="article:modified_time" content="2021-03-12T13:57:16.551Z">
 <meta property="article:author" content="热爱篮球和安全的小伙子">
 <meta property="article:tag" content="PHP代码审计">
 <meta name="twitter:card" content="summary">
@@ -249,7 +251,7 @@
       <span class="post-meta-item-text">Posted on</span>
       
 
-      <time title="Created: 2021-03-12 19:28:02 / Modified: 21:21:40" itemprop="dateCreated datePublished" datetime="2021-03-12T19:28:02+08:00">2021-03-12</time>
+      <time title="Created: 2021-03-12 19:28:02 / Modified: 21:57:16" itemprop="dateCreated datePublished" datetime="2021-03-12T19:28:02+08:00">2021-03-12</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -299,7 +301,12 @@
 <p><img src="/2021/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/5.png" alt="5"></p>
 <p>但是发现一个问题：</p>
 <p><img src="/2021/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/6.png" alt="6"></p>
-<p>反正没琢磨明白。。。。。</p>
+<p>为什么这三个语句只能有一个执行成功呢，字符在and语句中是0,个人觉得如果and语句第一个条件是0的话后面的就不会执行，mysql会直接判断为0。</p>
+<p>我们换一下位置</p>
+<p><img src="/2021/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/7.png" alt="7"></p>
+<p>果然第一个and语句会执行，所以当为and的时候要用insert into test values (“adn”,’1’ and (select case when substr((select user()) from 1 for 1)=’r’ then sleep(5) else 0 end) and ‘1’,”admin”);至少第一个要为数字或者是1</p>
+<p>运算符+的情况为空或者数字都行<br><img src="/2021/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/8.png" alt="8"></p>
+<p>其实是个很简单的东西，只是在本地测试的时候犯下很多糊涂，算是记录一下长长记性，钻研问题就从小问题开始对吧。</p>
 
     </div>
 
