@@ -12,12 +12,12 @@
     <meta name="description" content="反序列化先决条件  通过文件读取或者源码泄露获取到key 禁用MAC验证功能的情况默认key合集https:&#x2F;&#x2F;github.com&#x2F;yuanhaiGreg&#x2F;Fuzz-Dict&#x2F;blob&#x2F;master&#x2F;ViewState_Key.txt利用方式  1.爆绝对路径 1for &#x2F;r 目录名 %i in (匹配模式1,匹配模式2) do @echo %i 1for &#x2F;r C:\ in">
 <meta property="og:type" content="article">
 <meta property="og:title" content="viewstate反序列化实战">
-<meta property="og:url" content="https://little-gu.github.io/2021/11/25/viewstate%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AE%9E%E6%88%98/index.html">
+<meta property="og:url" content="https://little-gu.github.io/2021/01/25/viewstate%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AE%9E%E6%88%98/index.html">
 <meta property="og:site_name" content="hungry and humble">
 <meta property="og:description" content="反序列化先决条件  通过文件读取或者源码泄露获取到key 禁用MAC验证功能的情况默认key合集https:&#x2F;&#x2F;github.com&#x2F;yuanhaiGreg&#x2F;Fuzz-Dict&#x2F;blob&#x2F;master&#x2F;ViewState_Key.txt利用方式  1.爆绝对路径 1for &#x2F;r 目录名 %i in (匹配模式1,匹配模式2) do @echo %i 1for &#x2F;r C:\ in">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2021-11-25T12:53:08.000Z">
-<meta property="article:modified_time" content="2021-11-25T13:29:52.193Z">
+<meta property="article:published_time" content="2021-01-25T12:53:08.000Z">
+<meta property="article:modified_time" content="2021-12-02T14:23:02.160Z">
 <meta property="article:author" content="G7shot">
 <meta property="article:tag" content="C#">
 <meta name="twitter:card" content="summary">
@@ -181,7 +181,7 @@
                             &nbsp;
                             .net
                         </a>
-                         <ul class="unstyled" id="tree" >  <li class="file active"><a href="/2021/11/25/viewstate%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AE%9E%E6%88%98/">viewstate反序列化实战</a></li>  </ul> 
+                         <ul class="unstyled" id="tree" >  <li class="file active"><a href="/2021/01/25/viewstate%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AE%9E%E6%88%98/">viewstate反序列化实战</a></li>  </ul> 
                     </li> 
                     
                     <li class="directory">
@@ -208,7 +208,7 @@
                             &nbsp;
                             java
                         </a>
-                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2020/02/16/cc1%E9%93%BE/">cc1链</a></li>  <li class="file"><a href="/2020/03/19/cc2%E9%93%BE/">cc2链</a></li>  <li class="file"><a href="/2020/04/19/cc5%E9%93%BE/">cc5链</a></li>  <li class="file"><a href="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/">结合两条cc链分析ysoserial实现</a></li>  </ul> 
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2020/02/16/cc1%E9%93%BE/">cc1链</a></li>  <li class="file"><a href="/2020/03/19/cc2%E9%93%BE/">cc2链</a></li>  <li class="file"><a href="/2020/04/19/cc5%E9%93%BE/">cc5链</a></li>  <li class="file"><a href="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/">结合两条cc链分析ysoserial实现</a></li>  <li class="file"><a href="/2021/12/02/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%8B%BF%E4%B8%8Bjava%E7%AB%99%E4%B9%8B%E5%90%8E%E7%9A%84%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E8%A7%A3%E5%86%B3/">记一次拿下java站之后的负载均衡解决</a></li>  </ul> 
                     </li> 
                     
                     <li class="directory">
@@ -321,8 +321,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2021/11/25/viewstate%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AE%9E%E6%88%98/">
-            <time datetime="2021-11-25T12:53:08.000Z" itemprop="datePublished">2021-11-25</time>
+        <a href="/2021/01/25/viewstate%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AE%9E%E6%88%98/">
+            <time datetime="2021-01-25T12:53:08.000Z" itemprop="datePublished">2021-01-25</time>
         </a>
     </div>
 
@@ -389,19 +389,19 @@
     
 <nav id="article-nav">
     
-        <a href="/2021/12/02/github%E6%B3%84%E9%9C%B2%E5%B7%A5%E5%85%B7%E6%B5%8B%E8%AF%95/" id="article-nav-newer" class="article-nav-link-wrap">
+        <a href="/2021/02/13/zzzcms/" id="article-nav-newer" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Newer</strong>
             <div class="article-nav-title">
                 
-                    github泄露工具测试
+                    zzzcms前台RCE
                 
             </div>
         </a>
     
     
-        <a href="/2021/11/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9B%B2%E6%8A%98%E6%B8%97%E9%80%8Fselenium-server/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2020/04/19/cc5%E9%93%BE/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">记一次曲折渗透selenium-server</div>
+            <div class="article-nav-title">cc5链</div>
         </a>
     
 </nav>
